@@ -58,21 +58,21 @@ def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
     print("Optimizer:", opt, "\n")
 
 
-OUTPUT_FILE = "tuning_results2.txt"
+OUTPUT_FILE = "tuning_results3.txt"
 
 sys.stdout = open(OUTPUT_FILE, "w")
 
 n_inputs = 65
 n_outputs = 2
 
-learning_rate_list = [0.001]
-hidden_lists= [[n_inputs, 1, n_outputs], [n_inputs, 2, n_outputs], [n_inputs, 3, n_outputs]]
+learning_rate_list = [0.01, 0.1]
+hidden_lists= [[n_inputs, 4, n_outputs], [n_inputs, 5, n_outputs], [n_inputs, 3, n_outputs]]
 activation_function_list = [tf.nn.relu, tf.nn.elu]
 #keep_prob_list = [0.2,0.4,0.5,0.7]
-keep_prob_list = [0.4, 0.7]
+keep_prob_list = [None]
 
 nb_epochs = 200
-batch_size_list = [100,500]
+batch_size_list = [500]
 #regularizer_list = [None, tf.contrib.layers.l2_regularizer]
 regularizer_list = [None]
 beta = 0
