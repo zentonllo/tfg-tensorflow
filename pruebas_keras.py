@@ -11,13 +11,16 @@ from numpy import genfromtxt
 from sklearn.metrics import roc_auc_score
 from dataset import Dataset
 
+import os
+# Disable info warnings from TF
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 batch_size = 500
-epochs = 200
+epochs = 20
 dropout_rate = 0.7
 beta = 0
 
-dataset = Dataset(path='data_regf_it17.csv', train_percentage=0.8)
+dataset = Dataset(path='data_regf_it17', train_percentage=0.8)
 x_train = dataset.x_train
 y_train = dataset.y_train
 x_test = dataset.x_test

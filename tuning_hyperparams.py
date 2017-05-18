@@ -10,6 +10,7 @@ from tensorflow.contrib.layers import batch_norm
 from nn import DNN
 from dataset import Dataset
 import sys
+import time
 
 # Desactivamos warnings
 import os
@@ -54,7 +55,7 @@ def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
     print("Probabilidad dropout:", kp, "\n")
     print("Batch size:", bs, "\n")
     print("Regularizer:", reg, "\n")
-    print("Batch normalization (i=0 No, i=1 Si):", bn, "\n")
+    print("Batch normalization (Si = 1, No = 0):", bn, "\n")
     print("Optimizer:", opt, "\n")
 
 
@@ -91,12 +92,14 @@ optimizers_list = [tf.train.AdamOptimizer]
 
 
 # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
-dataset = Dataset(path = 'data_regf_it17.csv', train_percentage = 0.8 )
+dataset = Dataset(path = 'data_regf_it17', train_percentage = 0.8, test_percentage = 0.1 )
 x_test = dataset.x_test
 y_test = dataset.y_test
 
 best_auc = 0
 it = 0
+
+start_time = time.time()
 
 for learning_rate in learning_rate_list:
     for hidden_list in hidden_lists:
@@ -122,14 +125,17 @@ for learning_rate in learning_rate_list:
                                 
                                 print(" --------- Modelo", it+1, " ---------", "\n" )
                                 print_parameters(learning_rate,hidden_list,activation_function,keep_prob,batch_size,regularizer,i,optimizer)
+                                print(" ------- Entrenamiento modelo", it+1, " -------", "\n" )
                                 dnn.train(dataset=dataset, nb_epochs=nb_epochs, 
                                           batch_size=batch_size, 
                                           model_path=model_path, 
                                           train_path=train_path, 
                                           silent_mode=True)
+                                print(" ----- Fin entrenamiento modelo", it+1, " -----", "\n" )
                                 
+                                print(" ------- Test modelo", it+1, " -------", "\n" )
                                 dnn.test(x_test=x_test, y_test=y_test, model_path=model_path)
-                                
+                                print(" ------- Fin Test modelo", it+1, " -------", "\n" )
                                 print("  -----------------------------------", "\n")
                                 curr_auc = dnn.auc_roc(dataset.x_test, dataset.y_test, model_path=model_path)
                                 if curr_auc > best_auc:
@@ -145,6 +151,7 @@ for learning_rate in learning_rate_list:
                                 it += 1
 
 
+print("Tiempo de ejecución de los ", it, " modelos: ", dnn.print_execution_time(start_time, time.time()) )
 print("Mejor resultado (AUC):", best_auc, "\n")
 print_parameters(lr,hl,af,kp,bs,reg,bn,opt)
 

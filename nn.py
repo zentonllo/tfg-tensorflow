@@ -1,32 +1,49 @@
+"""
+Obtenido a partir de ejemplos de tensorflow.org y del libro de Aurelien Geron sobre Machine Learning
+
+
+Author: Alberto Terceño Ortega
+"""
 import tensorflow as tf
 import time
 import numpy as np
 from dataset import Dataset
 
-# Desactivamos warnings
+
 import os
+import matplotlib.pyplot as plt
 
 
-import sys
 from tensorflow.contrib.layers import fully_connected, batch_norm, dropout
 from tensorflow.contrib.framework import arg_scope
 from leaky_relu import leaky_relu
 
 from datetime import datetime
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import auc, roc_auc_score, roc_curve
 
 # Disable info warnings from TF
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
-
-NOW = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-#ROOT_LOGDIR = 'tf_logs'
+# Pasar estos datos como parámetros a la clase
+NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
 ROOT_LOGDIR = 'C:/tmp'
 LOG_DIR = "{}/run-{}".format(ROOT_LOGDIR, NOW)
 
-# Checkpoints default paths
+"""
+
 M_PATH = "./model/DNN.ckpt"
 TR_PATH = "./training/DNN_tr.ckpt"
+"""
+
+# Checkpoints default paths
+M_FOLDER = LOG_DIR + '/model'
+TR_FOLDER = LOG_DIR + '/training'
+
+M_PATH = M_FOLDER + '/DNN.ckpt'
+TR_PATH = TR_FOLDER + '/DNN_tr.ckpt'
+
+os.makedirs(M_FOLDER, exist_ok=True)
+os.makedirs(TR_FOLDER, exist_ok=True)
 
 
 
@@ -69,8 +86,18 @@ def print_execution_time(start, end):
     hours, rem = divmod(end-start, 3600)
     minutes, seconds = divmod(rem, 60)
     print("Execution time:","{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
-    
 
+# seria idoneo que se guardara en una imagen en el dir de trabajo
+# Meter dentro de la clase
+def plot_aucs(l_aucs):
+    n_epochs = len(l_aucs)
+    epochs = np.arange(n_epochs)
+    plt.plot(epochs, l_aucs)
+    plt.axis([0, n_epochs, min(l_aucs), 100])
+    plt.xlabel('Epochs')
+    plt.ylabel('Validation AUC values')
+    plt.show()
+    
 
 
 # 2 outputs para problemas de clasificación binaria
@@ -91,6 +118,8 @@ class DNN(object):
         tf.reset_default_graph()
         self.file_writer = None
         self.saver = None
+        self.merged = None
+        self.aucs = None
         self.learning_rate = 0.001
         self.hidden_list = hidden_list
         self.activation_function = activation_function
@@ -130,12 +159,15 @@ class DNN(object):
                 n_iter = len(hidden_list[1:])
                 for i in range(1,n_iter):
                     name_scope = "hidden" + str(i)
-                    Z = fully_connected(Z, hidden_list[i], scope=name_scope)
+                    Z = fully_connected(inputs=Z, num_outputs=hidden_list[i], scope=name_scope)
                     if self.keep_prob is not None:
                         Z = dropout(Z, self.keep_prob, is_training=self.is_training)
-                    
-            self.logits = fully_connected(Z, n_outputs, activation_fn=None, scope="outputs")
-            self.softmaxed_logits = tf.nn.softmax(self.logits)     
+            
+            # Batch normalization en la ultima capa?
+            self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, normalizer_fn=self.normalizer_fn, normalizer_params=self.normalizer_params, scope="outputs")
+            #self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, scope="outputs")
+            with tf.name_scope("softmaxed_output"):
+                self.softmaxed_logits = tf.nn.softmax(self.logits)     
             
         with tf.name_scope("loss"):
             xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits) 
@@ -150,10 +182,6 @@ class DNN(object):
             self.train_step = opt.minimize(self.loss, name='train_step')
 
         with tf.name_scope("eval"):
-            # Ver si esto es correcto, creo que habría que poner  self.softmaxed_logits
-            # Antigua versión
-            # correct = tf.nn.in_top_k(self.logits,self.y, 1)
-            # Nueva versión
             correct = tf.nn.in_top_k(self.softmaxed_logits,self.y, 1)
             self.accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
         tf.summary.scalar('accuracy', self.accuracy)
@@ -170,11 +198,16 @@ class DNN(object):
         x_training = dataset.x_train
         y_training = dataset.y_train
         
+        x_validation = dataset.x_val
+        y_validation = dataset.y_val
+        
         nb_data = x_training.shape[0]
         # nb_batches = nb_data // batch_size
         nb_batches = int(nb_data/batch_size)
         
         best_auc = 0
+        
+        self.aucs = []
 
         with tf.Session() as sess:
             sess.run(self.init)
@@ -187,44 +220,65 @@ class DNN(object):
                              feed_dict={self.is_training: True, self.X: x_batch,
                                         self.y: y_batch})
                 self.saver.save(sess, train_path)
-                #Check de esto
                 summary = sess.run(self.merged, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
                 self.file_writer.add_summary(summary, epoch)
-                cur_auc = self.auc_roc(dataset.x_test, dataset.y_test, train_path)
+                cur_auc = self.auc_roc(x_validation, y_validation, train_path)
+                self.aucs.append(cur_auc)
                 if cur_auc > best_auc:
                     best_auc = cur_auc
                     self.saver.save(sess, model_path)
-                acc_train = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
+                
                 
                 if not silent_mode:
-                    print("Epoch:", (epoch+1), "Train accuracy:", acc_train, "AUC:", cur_auc, "Best AUC:", best_auc)
-                    print("Train AUC:", self.auc_roc(dataset.x_train, dataset.y_train, train_path))
+                    acc_train = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
+                    auc_train = self.auc_roc(dataset.x_train, dataset.y_train, train_path)
+                    acc_val = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_validation, self.y: y_validation})
+                    print("Epoch:", (epoch+1), "Train accuracy:", acc_train, "Train AUC:", auc_train )
+                    print("Validation accuracy:", acc_val, "Validation AUC:", cur_auc, "Best Validation AUC:", best_auc, "\n")
+
         
         self.file_writer.close()
         print_execution_time(start_time, time.time())
         if silent_mode:
-            print("AUC:", best_auc)
+            print("Best Validation AUC:", best_auc)
         
         
-    def predict(self, x_test, model_path=M_PATH):
+    def predict(self, x_test, model_path=M_PATH, num_class=1):
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
             y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
-        return y_pred[:,1]
+        return y_pred[:,num_class]
 
     def test(self, x_test, y_test, model_path=M_PATH):
+        start_time = time.time()
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
             acc_test = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_test, self.y: y_test})
             print("Test accuracy:", acc_test)
+            auc_test = self.auc_roc(x_test, y_test, model_path)
+            print("Test AUC:", auc_test)
+            
+        print_execution_time(start_time, time.time())
 
 
     def auc_roc(self, x_test, y_test, model_path=M_PATH):
         y_score = self.predict(x_test, model_path)
         auc = roc_auc_score(y_true=y_test, y_score=y_score)
         return auc*100
-    
-    
+    # seria idoneo que se guardara en una imagen en el dir de trabajo
+    def plot_roc(self, x_test, y_test, model_path=M_PATH):
+        y_score = self.predict(x_test, model_path)
+        fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
+        roc_auc = auc(fpr, tpr)
+        plt.title('Receiver Operating Characteristic')
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.legend(loc = 'lower right')
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.show()
 
 if __name__ == "__main__":
     
@@ -235,31 +289,37 @@ if __name__ == "__main__":
     
     # Carga del dataset 
     # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
+    print("--------------------- (1) Starting to load dataset ---------------------","\n")
     
-    #OJO Muy gran training set!
-    dataset = Dataset(path = 'validation_it17.csv', train_percentage = 0.8 )
-    #dataset = Dataset(path = 'data_regf_it17.csv', train_percentage = 0.8 )
+    #OJO Gran training set!
+    #dataset = Dataset(path = 'validation_it17', train_percentage = 0.8, test_percentage  = 0.1 )
+    dataset = Dataset(path = 'data_regf_it17', train_percentage = 0.8, test_percentage = 0.1 )
     x_test = dataset.x_test
     y_test = dataset.y_test
     
-    
+    print("--------------------- Dataset loaded ---------------------","\n")
     #n_inputs = 65
     #n_outputs = 2
     n_inputs  = x_test.shape[1]
     n_outputs = np.unique(y_test).size
     
     # Hyperparameters 
+    
+    # Con Batch normalization se pueden usar grandes learning rates
     learning_rate = 0.001
-    hidden_list = [n_inputs, 5, n_outputs]
+    #hidden_list = [n_inputs, 5, n_outputs]
+    hidden_list = [n_inputs, n_outputs]
     activation_function = tf.nn.elu
     #activation_function = leaky_relu
-    #keep_prob = 0.7
-    keep_prob = None
+    
+    # (1 - keep_prob) es la probabilidad de que una neurona muera en el dropout
+    keep_prob = 0.5
+    #keep_prob = None
     
     
     nb_epochs = 200
-    #batch_size = 500
-    batch_size = 10000
+    #batch_size = 20000
+    batch_size = 500
     
     
     #regularizer = tf.contrib.layers.l2_regularizer
@@ -271,20 +331,34 @@ if __name__ == "__main__":
     normalizer_fn = None
     normalizer_params = None
     """
+    # Batch norm en la primera capa asegura normalización de los datos
     normalizer_fn=batch_norm
     # "batch_norm_params"
     normalizer_params = {
         'is_training': None,
+        # 0.9 o 0.99 o 0.999 o 0.9999 ...
+        # Segun performance guide de TF: menor si va bien en training y mej
+        # Según A.Geron, aumentar cuando el dataset es grande y los batches pequeños 
         'decay': 0.9,
         'updates_collections': None,
+        # Si usamos funciones de activacion que no sean relus --> scale:true
         'scale': True,
+        # Aumenta rendimiento según la performance guide de TF
+        'fused': True
+        
+        # Try zero_debias_moving_mean=True for improved stability
+        # 'zero_debias_moving_mean':True
+
+
     }
     
     
     optimizer = tf.train.AdamOptimizer(learning_rate=0.001, name='optimizer')
     #optimizer = tf.train.AdagradOptimizer(learning_rate=0.001, name='optimizer')
     #optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, name='optimizer')
-
+    
+    print("--------------------- (2) Starting to create the computational graph  ---------------------","\n")
+    
     dnn = DNN(hidden_list=hidden_list,
               activation_function = activation_function,
               keep_prob = keep_prob,
@@ -294,11 +368,24 @@ if __name__ == "__main__":
               normalizer_params = normalizer_params,
               optimizer = optimizer)
     
-
+    print("--------------------- Graph created ---------------------","\n")
+    
+    print("--------------------- (3) Starting training ---------------------","\n")
     
     dnn.train(dataset, nb_epochs, batch_size)
+    
+    print("--------------------- Training Finished ---------------------","\n")
+    
+    print("--------------------- (4) Starting test ---------------------","\n")
+    
     dnn.test(x_test=x_test, y_test=y_test)
 
+    print("--------------------- Test Finished ---------------------","\n")
+    
+    plot_aucs(dnn.aucs)
+    
+    dnn.plot_roc(x_test, y_test)
+    
     """
     print("------------Validation------------","\n")
     start_validation = time.time()

@@ -11,25 +11,48 @@ from __future__ import print_function
 
 import numpy as np
 from numpy import genfromtxt
+from os.path import isfile
 
 class Dataset(object):
     
-    def __init__(self, path, train_percentage=0.8):
+    def __init__(self, path, train_percentage=0.8, test_percentage=0.1):
+        
+        val_percentage = 1 - (train_percentage + test_percentage)
+        assert (train_percentage+test_percentage+val_percentage)==1, (
+                'train_percentage: %s, validation_percentage: %s, test_percentage: %s' % (train_percentage*100, val_percentage*100, test_percentage*100) )
+        
+        
         # Construct a DataSet.
-        csv_data = genfromtxt(path, delimiter=',')
-        
-        x_data = csv_data[:,:-1]
-        y_data = csv_data[:,-1]
+        np_file =  path + '.npy'
+        csv_file = path + '.csv'
         
         
-        tr_limit = int(x_data.shape[0]*train_percentage)
+        data = None
+        if isfile(np_file):
+            data = np.load(np_file)
+        else:
+            data = genfromtxt(csv_file, delimiter=',')
+            np.save(np_file, data)
+        
+        np.random.shuffle(data)
+        
+        x_data = data[:,:-1]
+        y_data = data[:,-1]
+        
+        dataset_samples = x_data.shape[0]
+        
+        tr_limit = int(dataset_samples*train_percentage)
         
         x_train = x_data[:tr_limit,:]
         y_train = y_data[:tr_limit]
 
+        val_limit = int(dataset_samples*(train_percentage+val_percentage))
         
-        x_test = x_data[tr_limit:,:]
-        y_test = y_data[tr_limit:]
+        x_val = x_data[tr_limit:val_limit,:]
+        y_val = y_data[tr_limit:val_limit]
+        
+        x_test = x_data[val_limit:,:]
+        y_test = y_data[val_limit:]
         
         
         x_train = x_train.astype('float32')
@@ -43,6 +66,9 @@ class Dataset(object):
 
         self.x_train = x_train
         self.y_train = y_train
+        
+        self.x_val = x_val
+        self.y_val = y_val
         
         self.x_test = x_test
         self.y_test = y_test

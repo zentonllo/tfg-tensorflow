@@ -14,10 +14,6 @@ def leaky_relu(x=None, alpha=0.1, name="LeakyReLU"):
     name : a string or None
         An optional name to attach to this activation function.
 
-    Examples
-    ---------
-    >>> network = tl.layers.DenseLayer(network, n_units=100, name = 'dense_lrelu',
-    ...                 act= lambda x : tl.act.lrelu(x, 0.2))
 
     References
     ------------
