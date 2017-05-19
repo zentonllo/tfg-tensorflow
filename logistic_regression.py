@@ -26,7 +26,7 @@ def print_time_training(start, end):
 
 # Carga del dataset 
 # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
-dataset = Dataset(path = 'data_regf_completo.csv', train_percentage = 0.8 )
+dataset = Dataset(path = 'data_regf_completo', train_percentage = 0.8 )
 x_test = dataset.x_test
 y_test = dataset.y_test
 

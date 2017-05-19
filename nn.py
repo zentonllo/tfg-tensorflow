@@ -29,11 +29,6 @@ NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
 ROOT_LOGDIR = 'C:/tmp'
 LOG_DIR = "{}/run-{}".format(ROOT_LOGDIR, NOW)
 
-"""
-
-M_PATH = "./model/DNN.ckpt"
-TR_PATH = "./training/DNN_tr.ckpt"
-"""
 
 # Checkpoints default paths
 M_FOLDER = LOG_DIR + '/model'
@@ -41,6 +36,9 @@ TR_FOLDER = LOG_DIR + '/training'
 
 M_PATH = M_FOLDER + '/DNN.ckpt'
 TR_PATH = TR_FOLDER + '/DNN_tr.ckpt'
+
+AUCS_PATH = LOG_DIR + '/validation_aucs.png'
+ROC_PATH = LOG_DIR + '/roc.png'
 
 os.makedirs(M_FOLDER, exist_ok=True)
 os.makedirs(TR_FOLDER, exist_ok=True)
@@ -87,17 +85,7 @@ def print_execution_time(start, end):
     minutes, seconds = divmod(rem, 60)
     print("Execution time:","{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
 
-# seria idoneo que se guardara en una imagen en el dir de trabajo
-# Meter dentro de la clase
-def plot_aucs(l_aucs):
-    n_epochs = len(l_aucs)
-    epochs = np.arange(n_epochs)
-    plt.plot(epochs, l_aucs)
-    plt.axis([0, n_epochs, min(l_aucs), 100])
-    plt.xlabel('Epochs')
-    plt.ylabel('Validation AUC values')
-    plt.show()
-    
+
 
 
 # 2 outputs para problemas de clasificación binaria
@@ -119,7 +107,6 @@ class DNN(object):
         self.file_writer = None
         self.saver = None
         self.merged = None
-        self.aucs = None
         self.learning_rate = 0.001
         self.hidden_list = hidden_list
         self.activation_function = activation_function
@@ -130,6 +117,7 @@ class DNN(object):
         self.normalizer_fn = normalizer_fn
         self.normalizer_params = normalizer_params
         self.optimizer = optimizer
+        self.aucs = []
         
         self.create_net()
     
@@ -207,7 +195,6 @@ class DNN(object):
         
         best_auc = 0
         
-        self.aucs = []
 
         with tf.Session() as sess:
             sess.run(self.init)
@@ -265,7 +252,8 @@ class DNN(object):
         y_score = self.predict(x_test, model_path)
         auc = roc_auc_score(y_true=y_test, y_score=y_score)
         return auc*100
-    # seria idoneo que se guardara en una imagen en el dir de trabajo
+    
+    
     def plot_roc(self, x_test, y_test, model_path=M_PATH):
         y_score = self.predict(x_test, model_path)
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
@@ -278,7 +266,21 @@ class DNN(object):
         plt.ylim([0, 1])
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
-        plt.show()
+        plt.savefig(ROC_PATH, bbox_inches='tight')
+    
+    # Solo funciona si se ha llamado a train previamente
+    def plot_aucs(self):
+        l_aucs = self.aucs
+        n_epochs = len(l_aucs)
+        epochs = np.arange(n_epochs)
+        plt.plot(epochs, l_aucs)
+        plt.axis([0, n_epochs, min(l_aucs), 100])
+        plt.xlabel('Epochs')
+        plt.ylabel('Validation AUC values')
+        plt.savefig(AUCS_PATH, bbox_inches='tight')
+    
+    
+        
 
 if __name__ == "__main__":
     
@@ -291,15 +293,27 @@ if __name__ == "__main__":
     # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
     print("--------------------- (1) Starting to load dataset ---------------------","\n")
     
-    #OJO Gran training set!
+    #OJO Dataset 5M filas! (No balanceado)
+    #n_inputs = 65
+    #n_outputs = 2
     #dataset = Dataset(path = 'validation_it17', train_percentage = 0.8, test_percentage  = 0.1 )
+    
+    #Introducir dataset balanceado de gran tamaño
+    
+    # Dataset de iteración 17 (260k filas)
+    #n_inputs = 65
+    #n_outputs = 2
     dataset = Dataset(path = 'data_regf_it17', train_percentage = 0.8, test_percentage = 0.1 )
+    
+    # Dataset con todas las variables (260k filas)
+    #n_inputs = 155
+    #n_outputs = 2
+    #dataset = Dataset(path = 'data_regf_completo', train_percentage = 0.8, test_percentage = 0.1 )
     x_test = dataset.x_test
     y_test = dataset.y_test
     
     print("--------------------- Dataset loaded ---------------------","\n")
-    #n_inputs = 65
-    #n_outputs = 2
+    
     n_inputs  = x_test.shape[1]
     n_outputs = np.unique(y_test).size
     
@@ -307,8 +321,7 @@ if __name__ == "__main__":
     
     # Con Batch normalization se pueden usar grandes learning rates
     learning_rate = 0.001
-    #hidden_list = [n_inputs, 5, n_outputs]
-    hidden_list = [n_inputs, n_outputs]
+    hidden_list = [n_inputs, 5, n_outputs]
     activation_function = tf.nn.elu
     #activation_function = leaky_relu
     
@@ -317,9 +330,10 @@ if __name__ == "__main__":
     #keep_prob = None
     
     
-    nb_epochs = 200
-    #batch_size = 20000
-    batch_size = 500
+    nb_epochs = 1000
+    #batch_size = 100000
+    batch_size = 20000
+    #batch_size = 500
     
     
     #regularizer = tf.contrib.layers.l2_regularizer
@@ -353,7 +367,7 @@ if __name__ == "__main__":
     }
     
     
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001, name='optimizer')
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name='optimizer')
     #optimizer = tf.train.AdagradOptimizer(learning_rate=0.001, name='optimizer')
     #optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, name='optimizer')
     
@@ -382,7 +396,7 @@ if __name__ == "__main__":
 
     print("--------------------- Test Finished ---------------------","\n")
     
-    plot_aucs(dnn.aucs)
+    dnn.plot_aucs()
     
     dnn.plot_roc(x_test, y_test)
     
