@@ -59,7 +59,7 @@ def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
     print("Optimizer:", opt, "\n")
 
 
-OUTPUT_FILE = "tuning_results3.txt"
+OUTPUT_FILE = "tuning_results.txt"
 
 sys.stdout = open(OUTPUT_FILE, "w")
 

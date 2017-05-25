@@ -4,47 +4,56 @@ Obtenido a partir de ejemplos de tensorflow.org y del libro de Aurelien Geron so
 
 Author: Alberto Terceño Ortega
 """
+
+"""
+TODO
+
+-- Desacoplar playground (que pasa con los kwargs y los flags?) Ej: mnist summaries Hacer argparse
+-- Fork de los dnn binarios y multiclase
+-- Pruebas con un dnn binario con una neurona al final y con función sigmoide (rendimiento?)
+
+
+--------------------------------
+-- Investigar ejemplos ML engine (census)
+-- Investigar api python google analytics
+
+
+--------------------------------
+-- Trabajo futuro
+
+-- Codificación de variables cualitativas a cuantitativas
+-- Investigar Python VTreat
+-- Añadir interval evaluation en Keras y funcionalidades extra (BN, etc...)
+-- Cross Validation 
+-- División elegante en módulos como ejemplos de MNIST
+-- Usar pandas en un jupyter notebook para preprocesar csv
+-- Incluir local response normalization y data augmentatio?
+-- Imágenes png pasarlas a tensorboard
+-- Se podría usar tf.metrics.auc sin inicializar variables locales?
+
+
+
+"""
 import tensorflow as tf
 import time
 import numpy as np
 from dataset import Dataset
+import io
 
-
+import sys
 import os
 import matplotlib.pyplot as plt
-
+import itertools
 
 from tensorflow.contrib.layers import fully_connected, batch_norm, dropout
 from tensorflow.contrib.framework import arg_scope
 from leaky_relu import leaky_relu
 
 from datetime import datetime
-from sklearn.metrics import auc, roc_auc_score, roc_curve
+from sklearn.metrics import auc, roc_auc_score, roc_curve, confusion_matrix
 
 # Disable info warnings from TF
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
-
-# Pasar estos datos como parámetros a la clase
-NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
-ROOT_LOGDIR = 'C:/tmp'
-LOG_DIR = "{}/run-{}".format(ROOT_LOGDIR, NOW)
-
-
-# Checkpoints default paths
-M_FOLDER = LOG_DIR + '/model'
-TR_FOLDER = LOG_DIR + '/training'
-
-M_PATH = M_FOLDER + '/DNN.ckpt'
-TR_PATH = TR_FOLDER + '/DNN_tr.ckpt'
-
-AUCS_PATH = LOG_DIR + '/validation_aucs.png'
-ROC_PATH = LOG_DIR + '/roc.png'
-
-os.makedirs(M_FOLDER, exist_ok=True)
-os.makedirs(TR_FOLDER, exist_ok=True)
-
-
-
 
 """
 n_inputs = 28 * 28  # Número de variables de entrada
@@ -86,6 +95,30 @@ def print_execution_time(start, end):
     print("Execution time:","{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
 
 
+# BN se incluiría con un booleano
+# BN vendría sin parámetros por defecto pero podremos incluirlos
+def print_parameters(**kwargs):
+    
+    print("Model hyperparameters", "\n") 
+    print("Learning Rate:", kwargs['learning_rate'])
+    print("Hidden Layers:", kwargs['hidden_layers'])
+    print("Activation Function:", kwargs['activation_function'])
+    print("Dropout Keep Probability:", kwargs['keep_prob'])
+    print("Batch size:", kwargs['batch_size'])
+    print("Regularization:", kwargs['regularization'])
+    
+    batch_normalization = kwargs['batch_normalization']
+    
+    if batch_normalization:
+        bn = 'Si'
+    else:
+        bn = 'No'
+        
+    print("Batch normalization:", bn)
+    if batch_normalization:
+        print("Batch normalization parameters:", kwargs['bn_params'])
+    
+    print("Optimizer:", kwargs['optimizer'], "\n")
 
 
 # 2 outputs para problemas de clasificación binaria
@@ -93,6 +126,7 @@ class DNN(object):
     
     
     def __init__(self,
+                 log_dir,
                  hidden_list,
                  activation_function=tf.nn.relu,
                  keep_prob = None, 
@@ -117,7 +151,7 @@ class DNN(object):
         self.normalizer_fn = normalizer_fn
         self.normalizer_params = normalizer_params
         self.optimizer = optimizer
-        self.aucs = []
+        self.log_dir = log_dir
         
         self.create_net()
     
@@ -174,12 +208,21 @@ class DNN(object):
             self.accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
         tf.summary.scalar('accuracy', self.accuracy)
         
+        # Summaries en Tensorboard de los pesos de las capas de la red neuronal
+        for i in range(1,n_iter):
+            with tf.variable_scope('hidden'+str(i), reuse=True):
+                variable_summaries(tf.get_variable('weights'))
+                
+        with tf.variable_scope('outputs', reuse=True):
+                variable_summaries(tf.get_variable('weights'))
+
+
         self.merged = tf.summary.merge_all()
         self.init = tf.global_variables_initializer()
     
         self.saver = tf.train.Saver()
-        
-    def train(self, dataset, nb_epochs=100, batch_size=10, model_path=M_PATH, train_path=TR_PATH, silent_mode=False):
+    
+    def train(self, dataset, model_path, train_path, nb_epochs=100, batch_size=10, silent_mode=False):
         
         start_time = time.time()
         
@@ -194,12 +237,12 @@ class DNN(object):
         nb_batches = int(nb_data/batch_size)
         
         best_auc = 0
-        
+        self.aucs = []
 
         with tf.Session() as sess:
             sess.run(self.init)
             
-            self.file_writer = tf.summary.FileWriter(LOG_DIR, sess.graph)
+            self.file_writer = tf.summary.FileWriter(self.log_dir, sess.graph)
             for epoch in range(nb_epochs):
                 for batch in range(nb_batches):
                     x_batch, y_batch = dataset.next_batch(batch_size)
@@ -207,14 +250,19 @@ class DNN(object):
                              feed_dict={self.is_training: True, self.X: x_batch,
                                         self.y: y_batch})
                 self.saver.save(sess, train_path)
+                
                 summary = sess.run(self.merged, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
                 self.file_writer.add_summary(summary, epoch)
+                
+                # Añadimos el auc_roc sobre validacion de esta manera, pues usar tf.metrics.auc requiere inicializar variables locales, lo cual no he logrado conseguir en el código
                 cur_auc = self.auc_roc(x_validation, y_validation, train_path)
-                self.aucs.append(cur_auc)
+                summary_auc = tf.Summary(value=[tf.Summary.Value(tag="AUCs_Validation", simple_value=cur_auc)])
+                self.file_writer.add_summary(summary_auc, epoch)
+                
+
                 if cur_auc > best_auc:
                     best_auc = cur_auc
                     self.saver.save(sess, model_path)
-                
                 
                 if not silent_mode:
                     acc_train = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
@@ -226,17 +274,26 @@ class DNN(object):
         
         self.file_writer.close()
         print_execution_time(start_time, time.time())
+        
         if silent_mode:
             print("Best Validation AUC:", best_auc)
-        
-        
-    def predict(self, x_test, model_path=M_PATH, num_class=1):
+            
+    
+    # Da la probabilidad de num_class para los x_test
+    def predict(self, x_test, model_path, num_class=1):
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
             y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
         return y_pred[:,num_class]
-
-    def test(self, x_test, y_test, model_path=M_PATH):
+    
+    # Predice la clase para los x_test (es decir, toma el máximo de las probabilidades de salida)
+    def predict_class(self, x_test, model_path):
+        with tf.Session() as sess:
+            self.saver.restore(sess, model_path)
+            y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
+            return tf.argmax(y_pred,1).eval()
+    
+    def test(self, x_test, y_test, model_path):
         start_time = time.time()
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
@@ -248,13 +305,13 @@ class DNN(object):
         print_execution_time(start_time, time.time())
 
 
-    def auc_roc(self, x_test, y_test, model_path=M_PATH):
+    def auc_roc(self, x_test, y_test, model_path):
         y_score = self.predict(x_test, model_path)
         auc = roc_auc_score(y_true=y_test, y_score=y_score)
         return auc*100
     
     
-    def plot_roc(self, x_test, y_test, model_path=M_PATH):
+    def save_roc(self, x_test, y_test, model_path, roc_path):
         y_score = self.predict(x_test, model_path)
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
         roc_auc = auc(fpr, tpr)
@@ -266,53 +323,99 @@ class DNN(object):
         plt.ylim([0, 1])
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
-        plt.savefig(ROC_PATH, bbox_inches='tight')
+        plt.savefig(roc_path, bbox_inches='tight')
+        
+
+    # Classes: vector con strings para las clases
+    def save_cm(self, x_test, y_test, model_path, cm_path, classes, normalize=True):
+        y_pred = self.predict_class(x_test, model_path)
+        cm = confusion_matrix(y_test, y_pred)
+        np.set_printoptions(precision=2)
+        plt.figure()
+        cmap=plt.cm.Blues
+        if normalize:
+          plt.title('Normalized confusion matrix') 
+        else:
+          plt.title('Confusion matrix, without normalization')   
+            
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
     
-    # Solo funciona si se ha llamado a train previamente
-    def plot_aucs(self):
-        l_aucs = self.aucs
-        n_epochs = len(l_aucs)
-        epochs = np.arange(n_epochs)
-        plt.plot(epochs, l_aucs)
-        plt.axis([0, n_epochs, min(l_aucs), 100])
-        plt.xlabel('Epochs')
-        plt.ylabel('Validation AUC values')
-        plt.savefig(AUCS_PATH, bbox_inches='tight')
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+        
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, cm[i, j],
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresh else "black")
     
-    
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
+        
+        plt.savefig(cm_path, bbox_inches='tight')
         
 
 if __name__ == "__main__":
     
-    """    
-    OUTPUT_FILE = "results_dnn.txt"
+    # Pasar estos datos como parámetros a la clase
+    NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
+    ROOT_LOGDIR = 'C:/tmp'
+    LOG_DIR = "{}/run-{}".format(ROOT_LOGDIR, NOW)
+    
+    
+    # Checkpoints default paths
+    M_FOLDER = LOG_DIR + '/model'
+    TR_FOLDER = LOG_DIR + '/training'
+    
+    M_PATH = M_FOLDER + '/DNN.ckpt'
+    TR_PATH = TR_FOLDER + '/DNN_tr.ckpt'
+    
+    ROC_PATH = LOG_DIR + '/roc.png'
+    CM_PATH = LOG_DIR + '/cm.png'
+    CM_PATH_NORM = LOG_DIR + '/cm_norm.png'
+    
+    os.makedirs(M_FOLDER, exist_ok=True)
+    os.makedirs(TR_FOLDER, exist_ok=True)
+    
+     
+    OUTPUT_FILE = LOG_DIR+"/log.txt"
     sys.stdout = open(OUTPUT_FILE, "w")
-    """
+    
     
     # Carga del dataset 
     # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
     print("--------------------- (1) Starting to load dataset ---------------------","\n")
     
     #OJO Dataset 5M filas! (No balanceado)
-    #n_inputs = 65
-    #n_outputs = 2
-    #dataset = Dataset(path = 'validation_it17', train_percentage = 0.8, test_percentage  = 0.1 )
-    
-    #Introducir dataset balanceado de gran tamaño
+    # n_inputs = 65
+    # n_outputs = 2
+    # dataset_path = 'validation_it17'
+ 
+    #Introducir aquí dataset balanceado de gran tamaño
+    # .....
     
     # Dataset de iteración 17 (260k filas)
-    #n_inputs = 65
-    #n_outputs = 2
-    dataset = Dataset(path = 'data_regf_it17', train_percentage = 0.8, test_percentage = 0.1 )
-    
+    # n_inputs = 65
+    # n_outputs = 2
+    dataset_path = 'data_regf_it17'
+  
     # Dataset con todas las variables (260k filas)
-    #n_inputs = 155
-    #n_outputs = 2
-    #dataset = Dataset(path = 'data_regf_completo', train_percentage = 0.8, test_percentage = 0.1 )
+    # n_inputs = 155
+    # n_outputs = 2
+    # dataset_path = 'data_regf_completo'
+
+    dataset = Dataset(path = dataset_path, train_percentage = 0.8, test_percentage = 0.1 )
     x_test = dataset.x_test
     y_test = dataset.y_test
     
-    print("--------------------- Dataset loaded ---------------------","\n")
+    print("--------------------- Dataset", dataset_path, "succesfully loaded ---------------------","\n")
     
     n_inputs  = x_test.shape[1]
     n_outputs = np.unique(y_test).size
@@ -330,11 +433,11 @@ if __name__ == "__main__":
     #keep_prob = None
     
     
-    nb_epochs = 1000
+    nb_epochs = 10
     #batch_size = 100000
-    batch_size = 20000
-    #batch_size = 500
-    
+    #batch_size = 20000
+    batch_size = 500
+    #batch_size = 20
     
     #regularizer = tf.contrib.layers.l2_regularizer
     #beta = 0.001
@@ -368,12 +471,14 @@ if __name__ == "__main__":
     
     
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name='optimizer')
-    #optimizer = tf.train.AdagradOptimizer(learning_rate=0.001, name='optimizer')
-    #optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, name='optimizer')
+    # optimizer = tf.train.FtrlOptimizer(learning_rate=learning_rate, l1_regularization_strength=0.0, l2_regularization_strength=0.0, name='optimizer')
+    #optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate, name='optimizer')
+    #optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, name='optimizer')
     
     print("--------------------- (2) Starting to create the computational graph  ---------------------","\n")
     
-    dnn = DNN(hidden_list=hidden_list,
+    dnn = DNN(log_dir = LOG_DIR,
+              hidden_list=hidden_list,
               activation_function = activation_function,
               keep_prob = keep_prob,
               regularizer = regularizer,
@@ -382,35 +487,38 @@ if __name__ == "__main__":
               normalizer_params = normalizer_params,
               optimizer = optimizer)
     
+    # Probablemente haya que usar FLAGS para parsear y para pasar parámetros a la función
+    # print_parameters(...)
+    
+    
     print("--------------------- Graph created ---------------------","\n")
     
     print("--------------------- (3) Starting training ---------------------","\n")
     
-    dnn.train(dataset, nb_epochs, batch_size)
+    dnn.train(dataset=dataset,model_path=M_PATH, train_path=TR_PATH, nb_epochs=nb_epochs, batch_size=batch_size, silent_mode=False)
     
     print("--------------------- Training Finished ---------------------","\n")
     
     print("--------------------- (4) Starting test ---------------------","\n")
     
-    dnn.test(x_test=x_test, y_test=y_test)
+    dnn.test(x_test=x_test, y_test=y_test, model_path=M_PATH)
 
     print("--------------------- Test Finished ---------------------","\n")
     
-    dnn.plot_aucs()
     
-    dnn.plot_roc(x_test, y_test)
+    print("--------------------- (5) Saving model ROC curve ---------------------","\n")
     
-    """
-    print("------------Validation------------","\n")
-    start_validation = time.time()
-    dataset_val = Dataset(path = 'validation_it17.csv', train_percentage = 0 )
-    dnn.test(x_test=dataset_val.x_test, y_test=dataset_val.y_test)
-    auc_val = dnn.auc_roc(x_test=dataset_val.x_test, y_test=dataset_val.y_test)
-    print("Validation AUC:", auc_val)
-    print_execution_time(start_validation, time.time())
-    """
+    dnn.save_roc(x_test, y_test, model_path=M_PATH, roc_path=ROC_PATH)
+    
+    print("--------------------- ROC curve saved ---------------------","\n")
+    
+    print("--------------------- (5) Saving confusion matrix ---------------------","\n")
+    
+    dnn.save_cm(x_test, y_test, model_path=M_PATH, cm_path=CM_PATH_NORM, classes=['User not booking','User booking'],normalize=True)
+    dnn.save_cm(x_test, y_test, model_path=M_PATH, cm_path=CM_PATH, classes=['User not booking','User booking'], normalize=False)
+    
+    print("--------------------- Confusion matrix saved ---------------------","\n")
     
     
-    """
     sys.stdout = sys.__stdout__
-    """
+    
