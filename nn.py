@@ -8,6 +8,7 @@ Author: Alberto Terceño Ortega
 """
 TODO
 
+
 -- Desacoplar playground (que pasa con los kwargs y los flags?) Ej: mnist summaries Hacer argparse
 -- Fork de los dnn binarios y multiclase
 -- Pruebas con un dnn binario con una neurona al final y con función sigmoide (rendimiento?)
@@ -21,13 +22,14 @@ TODO
 --------------------------------
 -- Trabajo futuro
 
+-- Incluir tsne en el playground (scikit learn y luego pasar al embedding de Tensorboard)
 -- Codificación de variables cualitativas a cuantitativas
 -- Investigar Python VTreat
 -- Añadir interval evaluation en Keras y funcionalidades extra (BN, etc...)
 -- Cross Validation 
 -- División elegante en módulos como ejemplos de MNIST
 -- Usar pandas en un jupyter notebook para preprocesar csv
--- Incluir local response normalization y data augmentatio?
+-- Incluir local response normalization y data augmentation?
 -- Imágenes png pasarlas a tensorboard
 -- Se podría usar tf.metrics.auc sin inicializar variables locales?
 
@@ -38,7 +40,6 @@ import tensorflow as tf
 import time
 import numpy as np
 from dataset import Dataset
-import io
 
 import sys
 import os
@@ -95,30 +96,6 @@ def print_execution_time(start, end):
     print("Execution time:","{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
 
 
-# BN se incluiría con un booleano
-# BN vendría sin parámetros por defecto pero podremos incluirlos
-def print_parameters(**kwargs):
-    
-    print("Model hyperparameters", "\n") 
-    print("Learning Rate:", kwargs['learning_rate'])
-    print("Hidden Layers:", kwargs['hidden_layers'])
-    print("Activation Function:", kwargs['activation_function'])
-    print("Dropout Keep Probability:", kwargs['keep_prob'])
-    print("Batch size:", kwargs['batch_size'])
-    print("Regularization:", kwargs['regularization'])
-    
-    batch_normalization = kwargs['batch_normalization']
-    
-    if batch_normalization:
-        bn = 'Si'
-    else:
-        bn = 'No'
-        
-    print("Batch normalization:", bn)
-    if batch_normalization:
-        print("Batch normalization parameters:", kwargs['bn_params'])
-    
-    print("Optimizer:", kwargs['optimizer'], "\n")
 
 
 # 2 outputs para problemas de clasificación binaria
@@ -152,6 +129,7 @@ class DNN(object):
         self.normalizer_params = normalizer_params
         self.optimizer = optimizer
         self.log_dir = log_dir
+        self.batch_size = None
         
         self.create_net()
     
@@ -222,6 +200,20 @@ class DNN(object):
     
         self.saver = tf.train.Saver()
     
+    # Wrapper para el training
+    def feed_dict(self, dataset, mode):
+        
+        fd = None
+        if mode is 'batch_training':
+            x_batch, y_batch = dataset.next_batch(self.batch_size)
+            fd = {self.is_training: True, self.X: x_batch, self.y: y_batch}
+        elif mode is 'training_test':
+            fd = {self.is_training: False, self.X: dataset.x_train, self.y: dataset.y_train}
+        elif mode is 'validation_test':
+            fd = {self.is_training: False, self.X: dataset.x_val, self.y: dataset.y_val}
+
+        return fd
+    
     def train(self, dataset, model_path, train_path, nb_epochs=100, batch_size=10, silent_mode=False):
         
         start_time = time.time()
@@ -232,8 +224,9 @@ class DNN(object):
         x_validation = dataset.x_val
         y_validation = dataset.y_val
         
-        nb_data = x_training.shape[0]
+        nb_data = dataset._num_examples
         # nb_batches = nb_data // batch_size
+        self.batch_size= batch_size
         nb_batches = int(nb_data/batch_size)
         
         best_auc = 0
@@ -245,13 +238,12 @@ class DNN(object):
             self.file_writer = tf.summary.FileWriter(self.log_dir, sess.graph)
             for epoch in range(nb_epochs):
                 for batch in range(nb_batches):
-                    x_batch, y_batch = dataset.next_batch(batch_size)
                     sess.run(self.train_step,
-                             feed_dict={self.is_training: True, self.X: x_batch,
-                                        self.y: y_batch})
+                             feed_dict=self.feed_dict(dataset, mode='batch_training'))
                 self.saver.save(sess, train_path)
                 
-                summary = sess.run(self.merged, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
+                # Correr los summaries con los datos del batch?
+                summary = sess.run(self.merged, feed_dict=self.feed_dict(dataset, mode='training_test'))
                 self.file_writer.add_summary(summary, epoch)
                 
                 # Añadimos el auc_roc sobre validacion de esta manera, pues usar tf.metrics.auc requiere inicializar variables locales, lo cual no he logrado conseguir en el código
@@ -265,9 +257,9 @@ class DNN(object):
                     self.saver.save(sess, model_path)
                 
                 if not silent_mode:
-                    acc_train = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_training, self.y: y_training})
-                    auc_train = self.auc_roc(dataset.x_train, dataset.y_train, train_path)
-                    acc_val = sess.run(self.accuracy, feed_dict={self.is_training: False, self.X: x_validation, self.y: y_validation})
+                    acc_train = sess.run(self.accuracy, feed_dict=self.feed_dict(dataset, mode='training_test'))
+                    auc_train = self.auc_roc(x_training, y_training, train_path)
+                    acc_val = sess.run(self.accuracy, feed_dict=self.feed_dict(dataset, mode='validation_test'))
                     print("Epoch:", (epoch+1), "Train accuracy:", acc_train, "Train AUC:", auc_train )
                     print("Validation accuracy:", acc_val, "Validation AUC:", cur_auc, "Best Validation AUC:", best_auc, "\n")
 
@@ -324,6 +316,7 @@ class DNN(object):
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         plt.savefig(roc_path, bbox_inches='tight')
+        
         
 
     # Classes: vector con strings para las clases
@@ -417,8 +410,8 @@ if __name__ == "__main__":
     
     print("--------------------- Dataset", dataset_path, "succesfully loaded ---------------------","\n")
     
-    n_inputs  = x_test.shape[1]
-    n_outputs = np.unique(y_test).size
+    n_inputs  = dataset._num_features
+    n_outputs = 2
     
     # Hyperparameters 
     
@@ -433,11 +426,11 @@ if __name__ == "__main__":
     #keep_prob = None
     
     
-    nb_epochs = 10
+    nb_epochs = 400
     #batch_size = 100000
     #batch_size = 20000
-    batch_size = 500
-    #batch_size = 20
+    # batch_size = 500
+    batch_size = 20
     
     #regularizer = tf.contrib.layers.l2_regularizer
     #beta = 0.001

@@ -63,6 +63,7 @@ class Dataset(object):
               'x_train.shape: %s y_train.shape: %s' % (x_train.shape, y_train.shape))
         
         self._num_examples = x_train.shape[0]
+        self._num_features = x_train.shape[1]
 
         self.x_train = x_train
         self.y_train = y_train
