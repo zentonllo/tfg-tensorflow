@@ -74,9 +74,9 @@ keep_prob_list = [None]
 
 nb_epochs = 200
 batch_size_list = [500]
-#regularizer_list = [None, tf.contrib.layers.l2_regularizer]
+#regularizer_list = [None,tf.contrib.layers.l1_regularizer(scale=beta, scope=None),  tf.contrib.layers.l2_regularizer(scale=beta, scope=None)]
 regularizer_list = [None]
-beta = 0
+beta = 0.001
 
 normalizer_fn_list = [None, batch_norm]
 normalizer_params_list = [None, {
@@ -115,7 +115,6 @@ for learning_rate in learning_rate_list:
                                           activation_function = activation_function,
                                           keep_prob = keep_prob,
                                           regularizer = regularizer,
-                                          beta = beta,
                                           normalizer_fn = normalizer_fn_list[i],
                                           normalizer_params = normalizer_params_list[i],
                                           optimizer = optimizer)
