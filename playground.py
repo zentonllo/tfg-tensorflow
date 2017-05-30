@@ -7,12 +7,13 @@ Created on Fri May 26 11:03:21 2017
 import tensorflow as tf
 import argparse
 from dataset import Dataset
+
 from nn import *
-#from tensorflow.contrib.layers import batch_norm
 
 import sys
 import os
 
+from os.path import abspath
 from leaky_relu import leaky_relu
 
 from datetime import datetime
@@ -25,7 +26,7 @@ FLAGS = None
 
 # Default log-dir
 NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
-DEFAULT_ROOT_LOGDIR = 'C:/tmp'
+DEFAULT_ROOT_LOGDIR = '/tmp'
 DEFAULT_LOG_DIR = "{}/run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
 
 # Default value for Momentum optimizer
@@ -61,7 +62,7 @@ def print_parameters(n_inputs, n_outputs, normalizer_params):
     batch_normalization = FLAGS.batch_norm
     
     if batch_normalization:
-        bn = 'Si'
+        bn = 'Yes'
     else:
         bn = 'No'
         
@@ -175,35 +176,41 @@ def main(_):
     
     log_dir = FLAGS.log_dir
     
+    # Hacemos abspath para que funcione también en UNIX
+    log_dir = abspath(log_dir)
+    
+
     if tf.gfile.Exists(log_dir):
         tf.gfile.DeleteRecursively(log_dir)
     tf.gfile.MakeDirs(log_dir)
     
     # Checkpoints default paths
-    M_FOLDER = log_dir + '/model'
-    TR_FOLDER = log_dir + '/training'
+    M_FOLDER = abspath(log_dir + '/model')
+    TR_FOLDER = abspath(log_dir + '/training')
     
-    M_PATH = M_FOLDER + '/DNN.ckpt'
-    TR_PATH = TR_FOLDER + '/DNN_tr.ckpt'
+    M_PATH = abspath(M_FOLDER + '/DNN.ckpt')
+    TR_PATH = abspath(TR_FOLDER + '/DNN_tr.ckpt')
     
-    ROC_PATH = log_dir + '/roc.png'
-    CM_PATH = log_dir + '/cm.png'
-    CM_PATH_NORM = log_dir + '/cm_norm.png'
+    ROC_PATH = abspath(log_dir + '/roc.png')
+    CM_PATH = abspath(log_dir + '/cm.png')
+    CM_PATH_NORM = abspath(log_dir + '/cm_norm.png')
     
+
     os.makedirs(M_FOLDER, exist_ok=True)
     os.makedirs(TR_FOLDER, exist_ok=True)
     # tf.gfile.MakeDirs(M_FOLDER)
     # tf.gfile.MakeDirs(TR_FOLDER)
     
      
-    OUTPUT_FILE = log_dir+"/log.txt"
+    # OUTPUT_FILE = log_dir+"/log.txt"
+    OUTPUT_FILE = os.path.abspath(log_dir+"/log.txt")
     sys.stdout = open(OUTPUT_FILE, "w")
     
+    # El path va sin la extensión. El módulo Dataset se encarga de adjuntar la extensión
     dataset_path = FLAGS.train_file
     
     
     # Carga del dataset 
-    # En R hacemos previamente: write.table(MyData, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
     print("--------------------- (1) Starting to load dataset ---------------------","\n")
     
     dataset = Dataset(path = dataset_path, train_percentage = 0.8, test_percentage = 0.1 )
@@ -298,7 +305,7 @@ if __name__ == '__main__':
   parser.add_argument('--train_file',
                       required=True,
                       type=str,
-                      help='Path for the training csv file. Label column in the csv is the last one.')
+                      help='Path for the training csv file. Do not include the .csv extension! All the csv columns must be numeric. Label column in the csv is the last one.')
   parser.add_argument('--hidden_layers',
                       type=int,
                       default=None,

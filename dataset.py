@@ -10,9 +10,11 @@ from __future__ import print_function
 
 
 import numpy as np
-from numpy import genfromtxt
-from os.path import isfile
+import pandas as pd
+from os.path import isfile, abspath
 
+# Construct a DataSet. Train_percentage + test_percentage < 1
+# Use train_percentage = 0 if using the dataset for testing
 class Dataset(object):
     
     def __init__(self, path, train_percentage=0.8, test_percentage=0.1):
@@ -22,16 +24,23 @@ class Dataset(object):
                 'train_percentage: %s, validation_percentage: %s, test_percentage: %s' % (train_percentage*100, val_percentage*100, test_percentage*100) )
         
         
-        # Construct a DataSet.
-        np_file =  path + '.npy'
-        csv_file = path + '.csv'
+        
+        np_file =  abspath(path + '.npy')
+        csv_file = abspath(path + '.csv')
         
         
         data = None
         if isfile(np_file):
             data = np.load(np_file)
         else:
-            data = genfromtxt(csv_file, delimiter=',')
+            # En R podríamos ejecutar esto antes para eliminar la primera fila: 
+            # csv <- read.csv(csv_path)
+            # write.table(csv, file = "MyData.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
+            # y luego en el script parsear con genfromtxt
+            # data = np.genfromtxt(csv_file, delimiter=',')
+        
+            # Quizás hacer read_csv de pandas? 
+            data = pd.read_csv(csv_file, header=None, skiprows = 1).as_matrix()
             np.save(np_file, data)
         
         np.random.shuffle(data)

@@ -9,7 +9,6 @@ Author: Alberto Terceño Ortega
 TODO
 
 
--- Desacoplar playground (que pasa con los kwargs y los flags?) Ej: mnist summaries Hacer argparse
 -- Fork de los dnn binarios y multiclase
 -- Pruebas con un dnn binario con una neurona al final y con función sigmoide (rendimiento?)
 
@@ -39,18 +38,15 @@ TODO
 import tensorflow as tf
 import time
 import numpy as np
-from dataset import Dataset
 
-import sys
 import os
 import matplotlib.pyplot as plt
 import itertools
 
-from tensorflow.contrib.layers import fully_connected, batch_norm, dropout
+from tensorflow.contrib.layers import fully_connected, dropout
 from tensorflow.contrib.framework import arg_scope
-from leaky_relu import leaky_relu
 
-from datetime import datetime
+
 from sklearn.metrics import auc, roc_auc_score, roc_curve, confusion_matrix
 
 # Disable info warnings from TF
@@ -367,6 +363,8 @@ class DNN(object):
         
 
 if __name__ == "__main__":
-    # Test with hardcoded hyperparams in a playground
-    exec(open("./original_playground.py").read())
+    # Test using a Kaggle dataset (credit card fraud detection) 
+    # with hardcoded hyperparams in a playground
+    # URL: https://www.kaggle.com/dalpozz/creditcardfraud
+    exec(open('test_playground.py').read())
     
