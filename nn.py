@@ -315,7 +315,7 @@ class DNN(object):
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
         roc_auc = auc(fpr, tpr)
         plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc*100)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])
@@ -368,3 +368,36 @@ if __name__ == "__main__":
     # URL: https://www.kaggle.com/dalpozz/creditcardfraud
     exec(open('test_playground.py').read())
     
+    
+    
+"""
+
+def _get_streaming_metrics(prediction,label,num_classes):
+
+    with tf.name_scope("test"):
+        # the streaming accuracy (lookup and update tensors)
+        accuracy,accuracy_update = tf.metrics.accuracy(label, prediction, 
+                                               name='accuracy')
+        # Compute a per-batch confusion
+        batch_confusion = tf.confusion_matrix(label, prediction,
+                                             num_classes=num_classes,
+                                             name='batch_confusion')
+        # Create an accumulator variable to hold the counts
+        confusion = tf.Variable( tf.zeros([num_classes,num_classes], 
+                                          dtype=tf.int32 ),
+                                 name='confusion' )
+        # Create the update op for doing a "+=" accumulation on the batch
+        confusion_update = confusion.assign( confusion + batch_confusion )
+        # Cast counts to float so tf.summary.image renormalizes to [0,255]
+        confusion_image = tf.reshape( tf.cast( confusion, tf.float32),
+                                  [1, num_classes, num_classes, 1])
+        # Combine streaming accuracy and confusion matrix updates in one op
+        test_op = tf.group(accuracy_update, confusion_update)
+
+        tf.summary.image('confusion',confusion_image)
+        tf.summary.scalar('accuracy',accuracy)
+
+    return test_op,accuracy,confusion
+
+
+"""

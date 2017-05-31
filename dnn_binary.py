@@ -1,40 +1,12 @@
 """
-Obtenido a partir de ejemplos de tensorflow.org y del libro de Aurelien Geron sobre Machine Learning
 
+Especialización de dnn para problemas de clasificación binarios (1 sola neurona de salida)
+Obtenido a partir de ejemplos de tensorflow.org y del libro de Aurelien Geron sobre Machine Learning
 
 Author: Alberto Terceño Ortega
 """
 
-"""
-TODO
 
-
--- Fork de los dnn binarios y multiclase
--- Pruebas con un dnn binario con una neurona al final y con función sigmoide (rendimiento?)
-
-
---------------------------------
--- Investigar ejemplos ML engine (census)
--- Investigar api python google analytics
-
-
---------------------------------
--- Trabajo futuro
-
--- Incluir tsne en el playground (scikit learn y luego pasar al embedding de Tensorboard)
--- Codificación de variables cualitativas a cuantitativas
--- Investigar Python VTreat
--- Añadir interval evaluation en Keras y funcionalidades extra (BN, etc...)
--- Cross Validation 
--- División elegante en módulos como ejemplos de MNIST
--- Usar pandas en un jupyter notebook para preprocesar csv
--- Incluir local response normalization y data augmentation?
--- Imágenes png pasarlas a tensorboard (gyglim)
--- Se podría usar tf.metrics.auc sin inicializar variables locales?
-
-
-
-"""
 import tensorflow as tf
 import time
 import numpy as np
@@ -137,6 +109,8 @@ class DNN(object):
         self.optimizer = optimizer
         self.log_dir = log_dir
         self.batch_size = None
+        self.y_casted = None
+        self.predictions = None
         
         self.create_net()
     
@@ -174,11 +148,12 @@ class DNN(object):
             self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, normalizer_fn=self.normalizer_fn, normalizer_params=self.normalizer_params, scope="outputs")
             #self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, scope="outputs")
             with tf.name_scope("softmaxed_output"):
-                self.softmaxed_logits = tf.nn.sigmoid(self.logits)     
+                self.softmaxed_logits = tf.nn.sigmoid(self.logits)
             
         with tf.name_scope("loss"):
             y_casted = tf.cast(self.y, tf.float32)
-            xentropy = tf.nn.sigmoid_cross_entropy_with_logits(labels=y_casted, logits=self.logits) 
+            self.y_casted = tf.reshape(y_casted, [-1,1])
+            xentropy = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_casted, logits=self.logits) 
             #xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits) 
             self.loss = tf.reduce_mean(xentropy)
             if self.regularizer is not None:
@@ -192,8 +167,11 @@ class DNN(object):
 
         with tf.name_scope("eval"):
             # Cambiar esto 
-            correct = tf.nn.in_top_k(self.softmaxed_logits,self.y, 1)
-            self.accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
+            #correct = tf.nn.in_top_k(self.softmaxed_logits,self.y, 1)
+            self.predictions = tf.round(self.softmaxed_logits)
+            incorrect = tf.abs(tf.subtract(self.predictions, self.y_casted))
+            incorrect_casted = tf.cast(incorrect, tf.float32)
+            self.accuracy = tf.subtract(tf.cast(100, tf.float32),tf.reduce_mean(incorrect_casted))
         tf.summary.scalar('accuracy', self.accuracy)
         
         # Summaries en Tensorboard de los pesos de las capas de la red neuronal
@@ -292,8 +270,8 @@ class DNN(object):
     def predict_class(self, x_test, model_path):
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
-            y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
-            return y_pred.eval()
+            y_pred = sess.run(self.predictions, feed_dict={self.is_training: False, self.X: x_test})
+        return y_pred
     
     def test(self, x_test, y_test, model_path):
         start_time = time.time()
@@ -318,7 +296,7 @@ class DNN(object):
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
         roc_auc = auc(fpr, tpr)
         plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc*100)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])

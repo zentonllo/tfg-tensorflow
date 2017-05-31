@@ -15,9 +15,10 @@ import os
 import sys
 import tensorflow as tf
 
+from importlib import reload
 from os.path import abspath
-#from nn import DNN
-from dnn_binary import *
+from nn import DNN
+#from dnn_binary import *
 from dataset import Dataset
 from tensorflow.contrib.layers import batch_norm
 
