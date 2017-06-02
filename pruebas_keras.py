@@ -12,6 +12,8 @@ from sklearn.metrics import roc_auc_score
 from dataset import Dataset
 
 import os
+
+
 # Disable info warnings from TF
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
@@ -20,14 +22,16 @@ epochs = 20
 dropout_rate = 0.7
 beta = 0
 
-dataset = Dataset(path='data_regf_it17', train_percentage=0.8)
+dataset = Dataset(path='data_regf_it17')
 x_train = dataset.x_train
 y_train = dataset.y_train
+x_val = dataset.x_val
+y_val = dataset.y_val
 x_test = dataset.x_test
 y_test = dataset.y_test
 
-input_dim = x_test.shape[1]
-num_classes = np.unique(y_test).size
+input_dim = dataset._num_features
+num_classes = 2
 
 """
 Regularizacion:
@@ -62,7 +66,7 @@ history = model.fit(x_train, y_train,
                     batch_size=batch_size,
                     epochs=epochs,
                     verbose=1,
-                    validation_data=(x_test, y_test))
+                    validation_data=(x_val, y_val))
 
 # model = load_model('modelo_dnn.h5')
 score = model.evaluate(x_test, y_test, verbose=0)
@@ -75,5 +79,5 @@ model.save('modelo_dnn.h5')
 y_pred = model.predict_proba(x_test)
 y_score = y_pred[:,1]
 auc = roc_auc_score(y_true=y_test, y_score=y_score)
-print("\n", "AUC:", auc*100)
+print("\n", "Test AUC:", auc*100)
 
