@@ -1,0 +1,620 @@
+
+--------------------- (1) Starting to load dataset ---------------------
+
+--------------------- Dataset loaded ---------------------
+
+--------------------- (2) Starting to create the computational graph  ---------------------
+
+--------------------- Graph created ---------------------
+
+--------------------- (3) Starting training ---------------------
+
+Epoch: 1 Train accuracy: 0.906886 Train AUC: 88.7194630891
+Validation accuracy: 0.907014 Validation AUC: 88.9249040474 Best Validation AUC: 88.9249040474
+
+Epoch: 2 Train accuracy: 0.911229 Train AUC: 89.7365150442
+Validation accuracy: 0.909411 Validation AUC: 89.7906330358 Best Validation AUC: 89.7906330358
+
+Epoch: 3 Train accuracy: 0.912723 Train AUC: 90.2921772772
+Validation accuracy: 0.909909 Validation AUC: 90.3278987131 Best Validation AUC: 90.3278987131
+
+Epoch: 4 Train accuracy: 0.905092 Train AUC: 91.1934350032
+Validation accuracy: 0.904119 Validation AUC: 91.2870879529 Best Validation AUC: 91.2870879529
+
+Epoch: 5 Train accuracy: 0.915035 Train AUC: 91.3051266839
+Validation accuracy: 0.911652 Validation AUC: 91.3302592499 Best Validation AUC: 91.3302592499
+
+Epoch: 6 Train accuracy: 0.913408 Train AUC: 91.6111847227
+Validation accuracy: 0.911714 Validation AUC: 91.6164958402 Best Validation AUC: 91.6164958402
+
+Epoch: 7 Train accuracy: 0.911708 Train AUC: 91.6821694205
+Validation accuracy: 0.909348 Validation AUC: 91.6426070427 Best Validation AUC: 91.6426070427
+
+Epoch: 8 Train accuracy: 0.915505 Train AUC: 91.6479136051
+Validation accuracy: 0.911963 Validation AUC: 91.5174415136 Best Validation AUC: 91.6426070427
+
+Epoch: 9 Train accuracy: 0.91168 Train AUC: 91.6988973804
+Validation accuracy: 0.908632 Validation AUC: 91.6730236516 Best Validation AUC: 91.6730236516
+
+Epoch: 10 Train accuracy: 0.91656 Train AUC: 92.363649334
+Validation accuracy: 0.91517 Validation AUC: 92.3907025022 Best Validation AUC: 92.3907025022
+
+Epoch: 11 Train accuracy: 0.917852 Train AUC: 92.3300458763
+Validation accuracy: 0.915139 Validation AUC: 92.3552659022 Best Validation AUC: 92.3907025022
+
+Epoch: 12 Train accuracy: 0.914412 Train AUC: 92.1146220339
+Validation accuracy: 0.910998 Validation AUC: 92.0202214316 Best Validation AUC: 92.3907025022
+
+Epoch: 13 Train accuracy: 0.912517 Train AUC: 92.4825654772
+Validation accuracy: 0.911123 Validation AUC: 92.687741537 Best Validation AUC: 92.687741537
+
+Epoch: 14 Train accuracy: 0.91605 Train AUC: 92.3395949616
+Validation accuracy: 0.912711 Validation AUC: 92.3157731279 Best Validation AUC: 92.687741537
+
+Epoch: 15 Train accuracy: 0.915708 Train AUC: 92.4815630657
+Validation accuracy: 0.913333 Validation AUC: 92.4723240047 Best Validation AUC: 92.687741537
+
+Epoch: 16 Train accuracy: 0.91633 Train AUC: 92.6499060479
+Validation accuracy: 0.914111 Validation AUC: 92.6541784287 Best Validation AUC: 92.687741537
+
+Epoch: 17 Train accuracy: 0.909042 Train AUC: 92.2289663644
+Validation accuracy: 0.905862 Validation AUC: 92.1972648257 Best Validation AUC: 92.687741537
+
+Epoch: 18 Train accuracy: 0.90935 Train AUC: 92.7708187299
+Validation accuracy: 0.907761 Validation AUC: 92.7849630903 Best Validation AUC: 92.7849630903
+
+Epoch: 19 Train accuracy: 0.919416 Train AUC: 92.6159861725
+Validation accuracy: 0.916259 Validation AUC: 92.5904882145 Best Validation AUC: 92.7849630903
+
+Epoch: 20 Train accuracy: 0.921261 Train AUC: 92.7648491852
+Validation accuracy: 0.918376 Validation AUC: 92.737377208 Best Validation AUC: 92.7849630903
+
+Epoch: 21 Train accuracy: 0.918591 Train AUC: 93.0420781734
+Validation accuracy: 0.917006 Validation AUC: 93.0896169044 Best Validation AUC: 93.0896169044
+
+Epoch: 22 Train accuracy: 0.921362 Train AUC: 92.8435740538
+Validation accuracy: 0.918345 Validation AUC: 92.8529363382 Best Validation AUC: 93.0896169044
+
+Epoch: 23 Train accuracy: 0.913813 Train AUC: 93.0304355012
+Validation accuracy: 0.91243 Validation AUC: 93.0697490334 Best Validation AUC: 93.0896169044
+
+Epoch: 24 Train accuracy: 0.92449 Train AUC: 93.0809610578
+Validation accuracy: 0.92345 Validation AUC: 93.1709171346 Best Validation AUC: 93.1709171346
+
+Epoch: 25 Train accuracy: 0.923432 Train AUC: 93.0480043351
+Validation accuracy: 0.921178 Validation AUC: 93.0707643074 Best Validation AUC: 93.1709171346
+
+Epoch: 26 Train accuracy: 0.92128 Train AUC: 92.9626403036
+Validation accuracy: 0.918594 Validation AUC: 93.009908717 Best Validation AUC: 93.1709171346
+
+Epoch: 27 Train accuracy: 0.913 Train AUC: 91.169920107
+Validation accuracy: 0.911341 Validation AUC: 91.4692918388 Best Validation AUC: 93.1709171346
+
+Epoch: 28 Train accuracy: 0.917953 Train AUC: 91.516207723
+Validation accuracy: 0.916135 Validation AUC: 91.7821470449 Best Validation AUC: 93.1709171346
+
+Epoch: 29 Train accuracy: 0.92177 Train AUC: 93.0699005099
+Validation accuracy: 0.91903 Validation AUC: 93.087643183 Best Validation AUC: 93.1709171346
+
+Epoch: 30 Train accuracy: 0.922907 Train AUC: 93.0599100096
+Validation accuracy: 0.92012 Validation AUC: 93.0917772143 Best Validation AUC: 93.1709171346
+
+Epoch: 31 Train accuracy: 0.920817 Train AUC: 93.1303736475
+Validation accuracy: 0.918376 Validation AUC: 93.2282373877 Best Validation AUC: 93.2282373877
+
+Epoch: 32 Train accuracy: 0.917708 Train AUC: 92.6206974031
+Validation accuracy: 0.91408 Validation AUC: 92.4906656087 Best Validation AUC: 93.2282373877
+
+Epoch: 33 Train accuracy: 0.920012 Train AUC: 92.9438141901
+Validation accuracy: 0.916757 Validation AUC: 92.9702244322 Best Validation AUC: 93.2282373877
+
+Epoch: 34 Train accuracy: 0.922159 Train AUC: 93.1977367204
+Validation accuracy: 0.920524 Validation AUC: 93.2376129001 Best Validation AUC: 93.2376129001
+
+Epoch: 35 Train accuracy: 0.919712 Train AUC: 92.8638592348
+Validation accuracy: 0.916041 Validation AUC: 92.8474890281 Best Validation AUC: 93.2376129001
+
+Epoch: 36 Train accuracy: 0.92014 Train AUC: 92.599520109
+Validation accuracy: 0.918407 Validation AUC: 92.8987610399 Best Validation AUC: 93.2376129001
+
+Epoch: 37 Train accuracy: 0.921218 Train AUC: 93.032483857
+Validation accuracy: 0.917754 Validation AUC: 93.0154652059 Best Validation AUC: 93.2376129001
+
+Epoch: 38 Train accuracy: 0.919552 Train AUC: 93.0215100466
+Validation accuracy: 0.918096 Validation AUC: 93.2527583372 Best Validation AUC: 93.2527583372
+
+Epoch: 39 Train accuracy: 0.924537 Train AUC: 93.213406142
+Validation accuracy: 0.922268 Validation AUC: 93.2420453836 Best Validation AUC: 93.2527583372
+
+Epoch: 40 Train accuracy: 0.916665 Train AUC: 92.7401883426
+Validation accuracy: 0.913271 Validation AUC: 92.7361270204 Best Validation AUC: 93.2527583372
+
+Epoch: 41 Train accuracy: 0.912529 Train AUC: 89.5696566313
+Validation accuracy: 0.910563 Validation AUC: 89.8530565065 Best Validation AUC: 93.2527583372
+
+Epoch: 42 Train accuracy: 0.913186 Train AUC: 89.4269130274
+Validation accuracy: 0.911528 Validation AUC: 89.7650225348 Best Validation AUC: 93.2527583372
+
+Epoch: 43 Train accuracy: 0.914 Train AUC: 93.2440237071
+Validation accuracy: 0.912617 Validation AUC: 93.2774376856 Best Validation AUC: 93.2774376856
+
+Epoch: 44 Train accuracy: 0.919366 Train AUC: 92.9033923363
+Validation accuracy: 0.91573 Validation AUC: 92.8877245767 Best Validation AUC: 93.2774376856
+
+Epoch: 45 Train accuracy: 0.924946 Train AUC: 93.2377287185
+Validation accuracy: 0.923793 Validation AUC: 93.3011156309 Best Validation AUC: 93.3011156309
+
+Epoch: 46 Train accuracy: 0.915521 Train AUC: 92.7981653589
+Validation accuracy: 0.911995 Validation AUC: 92.8097180584 Best Validation AUC: 93.3011156309
+
+Epoch: 47 Train accuracy: 0.920506 Train AUC: 93.0763836581
+Validation accuracy: 0.917909 Validation AUC: 93.0738512955 Best Validation AUC: 93.3011156309
+
+Epoch: 48 Train accuracy: 0.904396 Train AUC: 88.1801927689
+Validation accuracy: 0.902936 Validation AUC: 88.536118959 Best Validation AUC: 93.3011156309
+
+Epoch: 49 Train accuracy: 0.922331 Train AUC: 93.225758419
+Validation accuracy: 0.920431 Validation AUC: 93.2497796332 Best Validation AUC: 93.3011156309
+
+Epoch: 50 Train accuracy: 0.91563 Train AUC: 91.5238697545
+Validation accuracy: 0.914329 Validation AUC: 91.8439870351 Best Validation AUC: 93.3011156309
+
+Epoch: 51 Train accuracy: 0.923903 Train AUC: 93.1837175584
+Validation accuracy: 0.921334 Validation AUC: 93.2060628892 Best Validation AUC: 93.3011156309
+
+Epoch: 52 Train accuracy: 0.92163 Train AUC: 92.7480078729
+Validation accuracy: 0.919684 Validation AUC: 93.0571840659 Best Validation AUC: 93.3011156309
+
+Epoch: 53 Train accuracy: 0.921194 Train AUC: 93.2307582607
+Validation accuracy: 0.919559 Validation AUC: 93.2616009314 Best Validation AUC: 93.3011156309
+
+Epoch: 54 Train accuracy: 0.923245 Train AUC: 93.214460392
+Validation accuracy: 0.920773 Validation AUC: 93.2447905164 Best Validation AUC: 93.3011156309
+
+Epoch: 55 Train accuracy: 0.914572 Train AUC: 92.5022971895
+Validation accuracy: 0.913146 Validation AUC: 92.8248782615 Best Validation AUC: 93.3011156309
+
+Epoch: 56 Train accuracy: 0.917482 Train AUC: 93.1125874134
+Validation accuracy: 0.915357 Validation AUC: 93.159610409 Best Validation AUC: 93.3011156309
+
+Epoch: 57 Train accuracy: 0.923809 Train AUC: 93.292801271
+Validation accuracy: 0.922766 Validation AUC: 93.5046908347 Best Validation AUC: 93.5046908347
+
+Epoch: 58 Train accuracy: 0.921214 Train AUC: 93.1899292631
+Validation accuracy: 0.919341 Validation AUC: 93.4064701157 Best Validation AUC: 93.5046908347
+
+Epoch: 59 Train accuracy: 0.917089 Train AUC: 93.1021871007
+Validation accuracy: 0.914765 Validation AUC: 93.1376072855 Best Validation AUC: 93.5046908347
+
+Epoch: 60 Train accuracy: 0.914984 Train AUC: 92.6421227795
+Validation accuracy: 0.911714 Validation AUC: 92.5857545942 Best Validation AUC: 93.5046908347
+
+Epoch: 61 Train accuracy: 0.913712 Train AUC: 92.6400640845
+Validation accuracy: 0.912866 Validation AUC: 92.9542583637 Best Validation AUC: 93.5046908347
+
+Epoch: 62 Train accuracy: 0.917599 Train AUC: 92.7584396882
+Validation accuracy: 0.913893 Validation AUC: 92.6842719755 Best Validation AUC: 93.5046908347
+
+Epoch: 63 Train accuracy: 0.920704 Train AUC: 93.0620252952
+Validation accuracy: 0.917411 Validation AUC: 93.0803340151 Best Validation AUC: 93.5046908347
+
+Epoch: 64 Train accuracy: 0.917253 Train AUC: 92.7966693801
+Validation accuracy: 0.913769 Validation AUC: 92.743443795 Best Validation AUC: 93.5046908347
+
+Epoch: 65 Train accuracy: 0.920603 Train AUC: 93.0317660538
+Validation accuracy: 0.91794 Validation AUC: 93.0931204725 Best Validation AUC: 93.5046908347
+
+Epoch: 66 Train accuracy: 0.914688 Train AUC: 93.1441863192
+Validation accuracy: 0.913053 Validation AUC: 93.3835080974 Best Validation AUC: 93.5046908347
+
+Epoch: 67 Train accuracy: 0.922603 Train AUC: 93.1950502419
+Validation accuracy: 0.919466 Validation AUC: 93.1992736634 Best Validation AUC: 93.5046908347
+
+Epoch: 68 Train accuracy: 0.921677 Train AUC: 92.9142000854
+Validation accuracy: 0.920306 Validation AUC: 93.2491688579 Best Validation AUC: 93.5046908347
+
+Epoch: 69 Train accuracy: 0.916132 Train AUC: 92.7114543135
+Validation accuracy: 0.915419 Validation AUC: 93.082882268 Best Validation AUC: 93.5046908347
+
+Epoch: 70 Train accuracy: 0.916393 Train AUC: 92.7284014076
+Validation accuracy: 0.912991 Validation AUC: 92.7263743039 Best Validation AUC: 93.5046908347
+
+Epoch: 71 Train accuracy: 0.921163 Train AUC: 93.0679891958
+Validation accuracy: 0.918314 Validation AUC: 93.0520974041 Best Validation AUC: 93.5046908347
+
+Epoch: 72 Train accuracy: 0.910863 Train AUC: 92.5415541453
+Validation accuracy: 0.909784 Validation AUC: 92.8518199394 Best Validation AUC: 93.5046908347
+
+Epoch: 73 Train accuracy: 0.920836 Train AUC: 93.0506075653
+Validation accuracy: 0.917816 Validation AUC: 93.0289765395 Best Validation AUC: 93.5046908347
+
+Epoch: 74 Train accuracy: 0.916081 Train AUC: 92.8472236279
+Validation accuracy: 0.912679 Validation AUC: 92.8416421412 Best Validation AUC: 93.5046908347
+
+Epoch: 75 Train accuracy: 0.92184 Train AUC: 93.2743121465
+Validation accuracy: 0.920462 Validation AUC: 93.3362059012 Best Validation AUC: 93.5046908347
+
+Epoch: 76 Train accuracy: 0.921074 Train AUC: 93.2137958684
+Validation accuracy: 0.918968 Validation AUC: 93.279278513 Best Validation AUC: 93.5046908347
+
+Epoch: 77 Train accuracy: 0.919346 Train AUC: 92.988262986
+Validation accuracy: 0.916041 Validation AUC: 92.9723842947 Best Validation AUC: 93.5046908347
+
+Epoch: 78 Train accuracy: 0.922424 Train AUC: 93.1901588505
+Validation accuracy: 0.919621 Validation AUC: 93.2216589129 Best Validation AUC: 93.5046908347
+
+Epoch: 79 Train accuracy: 0.92179 Train AUC: 93.1590353882
+Validation accuracy: 0.918781 Validation AUC: 93.1706003369 Best Validation AUC: 93.5046908347
+
+Epoch: 80 Train accuracy: 0.918202 Train AUC: 92.8754581173
+Validation accuracy: 0.914952 Validation AUC: 92.8569423976 Best Validation AUC: 93.5046908347
+
+Epoch: 81 Train accuracy: 0.912381 Train AUC: 89.4634141989
+Validation accuracy: 0.910936 Validation AUC: 89.8415403722 Best Validation AUC: 93.5046908347
+
+Epoch: 82 Train accuracy: 0.925117 Train AUC: 93.3122461132
+Validation accuracy: 0.922921 Validation AUC: 93.4139260486 Best Validation AUC: 93.5046908347
+
+Epoch: 83 Train accuracy: 0.917097 Train AUC: 92.209063596
+Validation accuracy: 0.915824 Validation AUC: 92.5184927988 Best Validation AUC: 93.5046908347
+
+Epoch: 84 Train accuracy: 0.917996 Train AUC: 92.8969364167
+Validation accuracy: 0.914796 Validation AUC: 92.8712090342 Best Validation AUC: 93.5046908347
+
+Epoch: 85 Train accuracy: 0.914198 Train AUC: 92.4160839142
+Validation accuracy: 0.912648 Validation AUC: 92.7517959791 Best Validation AUC: 93.5046908347
+
+Epoch: 86 Train accuracy: 0.922537 Train AUC: 93.1464984837
+Validation accuracy: 0.919621 Validation AUC: 93.1887508778 Best Validation AUC: 93.5046908347
+
+Epoch: 87 Train accuracy: 0.916681 Train AUC: 91.7299040583
+Validation accuracy: 0.915886 Validation AUC: 92.1108166324 Best Validation AUC: 93.5046908347
+
+Epoch: 88 Train accuracy: 0.917116 Train AUC: 92.9124319424
+Validation accuracy: 0.914329 Validation AUC: 92.9102820962 Best Validation AUC: 93.5046908347
+
+Epoch: 89 Train accuracy: 0.923852 Train AUC: 92.7750144448
+Validation accuracy: 0.922517 Validation AUC: 93.1468593004 Best Validation AUC: 93.5046908347
+
+Epoch: 90 Train accuracy: 0.920163 Train AUC: 93.1495822878
+Validation accuracy: 0.918843 Validation AUC: 93.4297073185 Best Validation AUC: 93.5046908347
+
+Epoch: 91 Train accuracy: 0.921755 Train AUC: 93.2127137906
+Validation accuracy: 0.920618 Validation AUC: 93.4746218979 Best Validation AUC: 93.5046908347
+
+Epoch: 92 Train accuracy: 0.916167 Train AUC: 92.6942648954
+Validation accuracy: 0.912679 Validation AUC: 92.6932667041 Best Validation AUC: 93.5046908347
+
+Epoch: 93 Train accuracy: 0.921249 Train AUC: 93.2995183949
+Validation accuracy: 0.919777 Validation AUC: 93.3627676903 Best Validation AUC: 93.5046908347
+
+Epoch: 94 Train accuracy: 0.918062 Train AUC: 93.0878325409
+Validation accuracy: 0.915699 Validation AUC: 93.1295079131 Best Validation AUC: 93.5046908347
+
+Epoch: 95 Train accuracy: 0.922525 Train AUC: 93.2365870675
+Validation accuracy: 0.919777 Validation AUC: 93.2729385314 Best Validation AUC: 93.5046908347
+
+Epoch: 96 Train accuracy: 0.917428 Train AUC: 92.3055717947
+Validation accuracy: 0.916228 Validation AUC: 92.6593693474 Best Validation AUC: 93.5046908347
+
+Epoch: 97 Train accuracy: 0.921642 Train AUC: 92.974901098
+Validation accuracy: 0.920182 Validation AUC: 93.2957300696 Best Validation AUC: 93.5046908347
+
+Epoch: 98 Train accuracy: 0.901081 Train AUC: 82.5823178001
+Validation accuracy: 0.899823 Validation AUC: 83.3351835573 Best Validation AUC: 93.5046908347
+
+Epoch: 99 Train accuracy: 0.922405 Train AUC: 93.2762566899
+Validation accuracy: 0.920244 Validation AUC: 93.3163442946 Best Validation AUC: 93.5046908347
+
+Epoch: 100 Train accuracy: 0.920774 Train AUC: 93.3644886665
+Validation accuracy: 0.919186 Validation AUC: 93.4367220613 Best Validation AUC: 93.5046908347
+
+Epoch: 101 Train accuracy: 0.920766 Train AUC: 92.2796546358
+Validation accuracy: 0.919528 Validation AUC: 92.6044854835 Best Validation AUC: 93.5046908347
+
+Epoch: 102 Train accuracy: 0.919615 Train AUC: 92.9950441355
+Validation accuracy: 0.916197 Validation AUC: 93.0013457818 Best Validation AUC: 93.5046908347
+
+Epoch: 103 Train accuracy: 0.91361 Train AUC: 91.7430278321
+Validation accuracy: 0.912679 Validation AUC: 92.105868234 Best Validation AUC: 93.5046908347
+
+Epoch: 104 Train accuracy: 0.921549 Train AUC: 93.1471189892
+Validation accuracy: 0.918563 Validation AUC: 93.1764440916 Best Validation AUC: 93.5046908347
+
+Epoch: 105 Train accuracy: 0.923354 Train AUC: 93.3380194446
+Validation accuracy: 0.921832 Validation AUC: 93.4017150176 Best Validation AUC: 93.5046908347
+
+Epoch: 106 Train accuracy: 0.921167 Train AUC: 93.1137494858
+Validation accuracy: 0.917785 Validation AUC: 93.1429342303 Best Validation AUC: 93.5046908347
+
+Epoch: 107 Train accuracy: 0.919175 Train AUC: 92.4755106865
+Validation accuracy: 0.917629 Validation AUC: 92.8187047329 Best Validation AUC: 93.5046908347
+
+Epoch: 108 Train accuracy: 0.917751 Train AUC: 92.8311306726
+Validation accuracy: 0.913956 Validation AUC: 92.8514208101 Best Validation AUC: 93.5046908347
+
+Epoch: 109 Train accuracy: 0.919941 Train AUC: 93.0604065596
+Validation accuracy: 0.91682 Validation AUC: 93.0745560362 Best Validation AUC: 93.5046908347
+
+Epoch: 110 Train accuracy: 0.91335 Train AUC: 91.5782365981
+Validation accuracy: 0.91243 Validation AUC: 91.9563799778 Best Validation AUC: 93.5046908347
+
+Epoch: 111 Train accuracy: 0.920681 Train AUC: 92.6239814611
+Validation accuracy: 0.919248 Validation AUC: 92.9633631662 Best Validation AUC: 93.5046908347
+
+Epoch: 112 Train accuracy: 0.921428 Train AUC: 92.9821735101
+Validation accuracy: 0.920151 Validation AUC: 93.3249014128 Best Validation AUC: 93.5046908347
+
+Epoch: 113 Train accuracy: 0.920689 Train AUC: 92.4834316246
+Validation accuracy: 0.919155 Validation AUC: 92.8254120746 Best Validation AUC: 93.5046908347
+
+Epoch: 114 Train accuracy: 0.924253 Train AUC: 93.3070429279
+Validation accuracy: 0.921894 Validation AUC: 93.3621153017 Best Validation AUC: 93.5046908347
+
+Epoch: 115 Train accuracy: 0.919467 Train AUC: 93.2338345941
+Validation accuracy: 0.918034 Validation AUC: 93.3063284749 Best Validation AUC: 93.5046908347
+
+Epoch: 116 Train accuracy: 0.922086 Train AUC: 93.2041162702
+Validation accuracy: 0.919061 Validation AUC: 93.2591202441 Best Validation AUC: 93.5046908347
+
+Epoch: 117 Train accuracy: 0.923245 Train AUC: 93.409200265
+Validation accuracy: 0.92152 Validation AUC: 93.5329936689 Best Validation AUC: 93.5329936689
+
+Epoch: 118 Train accuracy: 0.923385 Train AUC: 93.3262477293
+Validation accuracy: 0.921396 Validation AUC: 93.3886873823 Best Validation AUC: 93.5329936689
+
+Epoch: 119 Train accuracy: 0.915517 Train AUC: 89.5901177704
+Validation accuracy: 0.914516 Validation AUC: 89.9980639542 Best Validation AUC: 93.5329936689
+
+Epoch: 120 Train accuracy: 0.919027 Train AUC: 92.9886673613
+Validation accuracy: 0.915606 Validation AUC: 93.0085900688 Best Validation AUC: 93.5329936689
+
+Epoch: 121 Train accuracy: 0.919548 Train AUC: 92.9728828534
+Validation accuracy: 0.91601 Validation AUC: 92.9858669912 Best Validation AUC: 93.5329936689
+
+Epoch: 122 Train accuracy: 0.922961 Train AUC: 93.2967331915
+Validation accuracy: 0.920586 Validation AUC: 93.3709100183 Best Validation AUC: 93.5329936689
+
+Epoch: 123 Train accuracy: 0.922416 Train AUC: 93.1341361031
+Validation accuracy: 0.921022 Validation AUC: 93.4113070979 Best Validation AUC: 93.5329936689
+
+Epoch: 124 Train accuracy: 0.920194 Train AUC: 93.1369585603
+Validation accuracy: 0.917442 Validation AUC: 93.1803378399 Best Validation AUC: 93.5329936689
+
+Epoch: 125 Train accuracy: 0.920498 Train AUC: 93.0502074498
+Validation accuracy: 0.917224 Validation AUC: 93.0284767329 Best Validation AUC: 93.5329936689
+
+Epoch: 126 Train accuracy: 0.920144 Train AUC: 93.073535007
+Validation accuracy: 0.9171 Validation AUC: 93.0747019063 Best Validation AUC: 93.5329936689
+
+Epoch: 127 Train accuracy: 0.921833 Train AUC: 93.286688227
+Validation accuracy: 0.920431 Validation AUC: 93.5336778267 Best Validation AUC: 93.5336778267
+
+Epoch: 128 Train accuracy: 0.924214 Train AUC: 93.327926716
+Validation accuracy: 0.922921 Validation AUC: 93.4421854798 Best Validation AUC: 93.5336778267
+
+Epoch: 129 Train accuracy: 0.922148 Train AUC: 93.2259904538
+Validation accuracy: 0.919466 Validation AUC: 93.262227815 Best Validation AUC: 93.5336778267
+
+Epoch: 130 Train accuracy: 0.919766 Train AUC: 93.055970176
+Validation accuracy: 0.918096 Validation AUC: 93.345513848 Best Validation AUC: 93.5336778267
+
+Epoch: 131 Train accuracy: 0.912455 Train AUC: 89.6107082309
+Validation accuracy: 0.91131 Validation AUC: 90.069414588 Best Validation AUC: 93.5336778267
+
+Epoch: 132 Train accuracy: 0.918926 Train AUC: 93.3662466202
+Validation accuracy: 0.916975 Validation AUC: 93.4488010933 Best Validation AUC: 93.5336778267
+
+Epoch: 133 Train accuracy: 0.919665 Train AUC: 93.0725923471
+Validation accuracy: 0.917287 Validation AUC: 93.0893667774 Best Validation AUC: 93.5336778267
+
+Epoch: 134 Train accuracy: 0.915513 Train AUC: 92.6990836202
+Validation accuracy: 0.912897 Validation AUC: 92.7006474648 Best Validation AUC: 93.5336778267
+
+Epoch: 135 Train accuracy: 0.921619 Train AUC: 93.2297774337
+Validation accuracy: 0.919684 Validation AUC: 93.4669829561 Best Validation AUC: 93.5336778267
+
+Epoch: 136 Train accuracy: 0.920708 Train AUC: 93.1294482837
+Validation accuracy: 0.918127 Validation AUC: 93.1473027278 Best Validation AUC: 93.5336778267
+
+Epoch: 137 Train accuracy: 0.923412 Train AUC: 93.327492315
+Validation accuracy: 0.921209 Validation AUC: 93.3764920121 Best Validation AUC: 93.5336778267
+
+Epoch: 138 Train accuracy: 0.91075 Train AUC: 91.5041067678
+Validation accuracy: 0.910064 Validation AUC: 91.8434259272 Best Validation AUC: 93.5336778267
+
+Epoch: 139 Train accuracy: 0.90768 Train AUC: 91.4175447659
+Validation accuracy: 0.906422 Validation AUC: 91.7667237386 Best Validation AUC: 93.5336778267
+
+Epoch: 140 Train accuracy: 0.918381 Train AUC: 92.9339470104
+Validation accuracy: 0.915668 Validation AUC: 92.9313925481 Best Validation AUC: 93.5336778267
+
+Epoch: 141 Train accuracy: 0.922899 Train AUC: 93.2836803789
+Validation accuracy: 0.92205 Validation AUC: 93.3343887888 Best Validation AUC: 93.5336778267
+
+Epoch: 142 Train accuracy: 0.911521 Train AUC: 92.163260344
+Validation accuracy: 0.909909 Validation AUC: 92.4808014761 Best Validation AUC: 93.5336778267
+
+Epoch: 143 Train accuracy: 0.924996 Train AUC: 93.4155894689
+Validation accuracy: 0.923357 Validation AUC: 93.5078319647 Best Validation AUC: 93.5336778267
+
+Epoch: 144 Train accuracy: 0.913751 Train AUC: 92.3827772162
+Validation accuracy: 0.912711 Validation AUC: 92.7301682699 Best Validation AUC: 93.5336778267
+
+Epoch: 145 Train accuracy: 0.920206 Train AUC: 92.1555744448
+Validation accuracy: 0.918905 Validation AUC: 92.4966910298 Best Validation AUC: 93.5336778267
+
+Epoch: 146 Train accuracy: 0.91884 Train AUC: 92.9043566521
+Validation accuracy: 0.916166 Validation AUC: 92.9352352867 Best Validation AUC: 93.5336778267
+
+Epoch: 147 Train accuracy: 0.921833 Train AUC: 93.3554998428
+Validation accuracy: 0.920369 Validation AUC: 93.5422810328 Best Validation AUC: 93.5422810328
+
+Epoch: 148 Train accuracy: 0.918416 Train AUC: 92.9807193588
+Validation accuracy: 0.915419 Validation AUC: 93.0043258282 Best Validation AUC: 93.5422810328
+
+Epoch: 149 Train accuracy: 0.924202 Train AUC: 93.3282669301
+Validation accuracy: 0.922299 Validation AUC: 93.3770459607 Best Validation AUC: 93.5422810328
+
+Epoch: 150 Train accuracy: 0.920362 Train AUC: 92.7829002055
+Validation accuracy: 0.918968 Validation AUC: 93.1435660359 Best Validation AUC: 93.5422810328
+
+Epoch: 151 Train accuracy: 0.918774 Train AUC: 92.8445088577
+Validation accuracy: 0.915886 Validation AUC: 92.840221026 Best Validation AUC: 93.5422810328
+
+Epoch: 152 Train accuracy: 0.92465 Train AUC: 93.3744910685
+Validation accuracy: 0.923419 Validation AUC: 93.4878423861 Best Validation AUC: 93.5422810328
+
+Epoch: 153 Train accuracy: 0.918774 Train AUC: 93.0348277953
+Validation accuracy: 0.916384 Validation AUC: 93.0733734142 Best Validation AUC: 93.5422810328
+
+Epoch: 154 Train accuracy: 0.919292 Train AUC: 93.0277867331
+Validation accuracy: 0.916664 Validation AUC: 93.0778237958 Best Validation AUC: 93.5422810328
+
+Epoch: 155 Train accuracy: 0.919428 Train AUC: 93.3390891853
+Validation accuracy: 0.917754 Validation AUC: 93.3982973608 Best Validation AUC: 93.5422810328
+
+Epoch: 156 Train accuracy: 0.919626 Train AUC: 93.1079386101
+Validation accuracy: 0.916571 Validation AUC: 93.1126558848 Best Validation AUC: 93.5422810328
+
+Epoch: 157 Train accuracy: 0.921124 Train AUC: 93.1770703468
+Validation accuracy: 0.918532 Validation AUC: 93.212013138 Best Validation AUC: 93.5422810328
+
+Epoch: 158 Train accuracy: 0.910023 Train AUC: 88.9565260334
+Validation accuracy: 0.908975 Validation AUC: 89.3750181331 Best Validation AUC: 93.5422810328
+
+Epoch: 159 Train accuracy: 0.916696 Train AUC: 91.0807465479
+Validation accuracy: 0.91545 Validation AUC: 91.3879746053 Best Validation AUC: 93.5422810328
+
+Epoch: 160 Train accuracy: 0.919432 Train AUC: 93.2803007569
+Validation accuracy: 0.918407 Validation AUC: 93.5215052767 Best Validation AUC: 93.5422810328
+
+Epoch: 161 Train accuracy: 0.924113 Train AUC: 93.3870507633
+Validation accuracy: 0.923108 Validation AUC: 93.5307626612 Best Validation AUC: 93.5422810328
+
+Epoch: 162 Train accuracy: 0.924226 Train AUC: 93.3005539715
+Validation accuracy: 0.921863 Validation AUC: 93.3381930463 Best Validation AUC: 93.5422810328
+
+Epoch: 163 Train accuracy: 0.918408 Train AUC: 92.4579854497
+Validation accuracy: 0.916851 Validation AUC: 92.8128632155 Best Validation AUC: 93.5422810328
+
+Epoch: 164 Train accuracy: 0.923728 Train AUC: 93.3635870349
+Validation accuracy: 0.921676 Validation AUC: 93.4273738437 Best Validation AUC: 93.5422810328
+
+Epoch: 165 Train accuracy: 0.922794 Train AUC: 93.2910438525
+Validation accuracy: 0.921053 Validation AUC: 93.3203127678 Best Validation AUC: 93.5422810328
+
+Epoch: 166 Train accuracy: 0.922354 Train AUC: 93.2055090075
+Validation accuracy: 0.919621 Validation AUC: 93.2445793179 Best Validation AUC: 93.5422810328
+
+Epoch: 167 Train accuracy: 0.922498 Train AUC: 93.3470977029
+Validation accuracy: 0.921116 Validation AUC: 93.5299630601 Best Validation AUC: 93.5422810328
+
+Epoch: 168 Train accuracy: 0.921556 Train AUC: 93.1611936786
+Validation accuracy: 0.918812 Validation AUC: 93.1671992359 Best Validation AUC: 93.5422810328
+
+Epoch: 169 Train accuracy: 0.922677 Train AUC: 93.2265993572
+Validation accuracy: 0.9204 Validation AUC: 93.2720651004 Best Validation AUC: 93.5422810328
+
+Epoch: 170 Train accuracy: 0.911696 Train AUC: 91.7241461413
+Validation accuracy: 0.910345 Validation AUC: 92.0460306023 Best Validation AUC: 93.5422810328
+
+Epoch: 171 Train accuracy: 0.92407 Train AUC: 93.360912765
+Validation accuracy: 0.923046 Validation AUC: 93.5505213533 Best Validation AUC: 93.5505213533
+
+Epoch: 172 Train accuracy: 0.91335 Train AUC: 90.474647879
+Validation accuracy: 0.912088 Validation AUC: 90.8436583887 Best Validation AUC: 93.5505213533
+
+Epoch: 173 Train accuracy: 0.921222 Train AUC: 93.1597661707
+Validation accuracy: 0.918252 Validation AUC: 93.1882806032 Best Validation AUC: 93.5505213533
+
+Epoch: 174 Train accuracy: 0.91891 Train AUC: 92.9639591256
+Validation accuracy: 0.916197 Validation AUC: 92.9520492813 Best Validation AUC: 93.5505213533
+
+Epoch: 175 Train accuracy: 0.909439 Train AUC: 88.3675780447
+Validation accuracy: 0.908134 Validation AUC: 88.7970157583 Best Validation AUC: 93.5505213533
+
+Epoch: 176 Train accuracy: 0.923467 Train AUC: 93.3405582853
+Validation accuracy: 0.921738 Validation AUC: 93.4315942337 Best Validation AUC: 93.5505213533
+
+Epoch: 177 Train accuracy: 0.923677 Train AUC: 93.3300814458
+Validation accuracy: 0.92096 Validation AUC: 93.394511449 Best Validation AUC: 93.5505213533
+
+Epoch: 178 Train accuracy: 0.911143 Train AUC: 88.9695455881
+Validation accuracy: 0.909784 Validation AUC: 89.3790608837 Best Validation AUC: 93.5505213533
+
+Epoch: 179 Train accuracy: 0.907785 Train AUC: 88.0823160504
+Validation accuracy: 0.906484 Validation AUC: 88.5424441746 Best Validation AUC: 93.5505213533
+
+Epoch: 180 Train accuracy: 0.912622 Train AUC: 92.4899569285
+Validation accuracy: 0.911559 Validation AUC: 92.873973855 Best Validation AUC: 93.5505213533
+
+Epoch: 181 Train accuracy: 0.909637 Train AUC: 90.565024446
+Validation accuracy: 0.908197 Validation AUC: 90.8868176045 Best Validation AUC: 93.5505213533
+
+Epoch: 182 Train accuracy: 0.919836 Train AUC: 91.8122748192
+Validation accuracy: 0.918874 Validation AUC: 92.1690138962 Best Validation AUC: 93.5505213533
+
+Epoch: 183 Train accuracy: 0.919424 Train AUC: 92.870933291
+Validation accuracy: 0.91654 Validation AUC: 92.884040237 Best Validation AUC: 93.5505213533
+
+Epoch: 184 Train accuracy: 0.913019 Train AUC: 90.9119342657
+Validation accuracy: 0.911995 Validation AUC: 91.2667444378 Best Validation AUC: 93.5505213533
+
+Epoch: 185 Train accuracy: 0.918634 Train AUC: 93.28235851
+Validation accuracy: 0.916726 Validation AUC: 93.3312897195 Best Validation AUC: 93.5505213533
+
+Epoch: 186 Train accuracy: 0.919587 Train AUC: 93.0433531058
+Validation accuracy: 0.916695 Validation AUC: 93.0698913239 Best Validation AUC: 93.5505213533
+
+Epoch: 187 Train accuracy: 0.909937 Train AUC: 86.8864106518
+Validation accuracy: 0.908695 Validation AUC: 87.3387662891 Best Validation AUC: 93.5505213533
+
+Epoch: 188 Train accuracy: 0.919517 Train AUC: 93.0784111002
+Validation accuracy: 0.916851 Validation AUC: 93.085762532 Best Validation AUC: 93.5505213533
+
+Epoch: 189 Train accuracy: 0.920498 Train AUC: 93.0945690801
+Validation accuracy: 0.91738 Validation AUC: 93.1047771075 Best Validation AUC: 93.5505213533
+
+Epoch: 190 Train accuracy: 0.922704 Train AUC: 93.2364042952
+Validation accuracy: 0.9204 Validation AUC: 93.2806146119 Best Validation AUC: 93.5505213533
+
+Epoch: 191 Train accuracy: 0.925047 Train AUC: 93.3662219318
+Validation accuracy: 0.923077 Validation AUC: 93.447130746 Best Validation AUC: 93.5505213533
+
+Epoch: 192 Train accuracy: 0.919844 Train AUC: 92.9657271188
+Validation accuracy: 0.91738 Validation AUC: 92.9789005734 Best Validation AUC: 93.5505213533
+
+Epoch: 193 Train accuracy: 0.920747 Train AUC: 93.0967434393
+Validation accuracy: 0.917847 Validation AUC: 93.0910577076 Best Validation AUC: 93.5505213533
+
+Epoch: 194 Train accuracy: 0.913638 Train AUC: 89.8498161703
+Validation accuracy: 0.912088 Validation AUC: 90.2403068263 Best Validation AUC: 93.5505213533
+
+Epoch: 195 Train accuracy: 0.920249 Train AUC: 93.110492799
+Validation accuracy: 0.917442 Validation AUC: 93.1378847072 Best Validation AUC: 93.5505213533
+
+Epoch: 196 Train accuracy: 0.914902 Train AUC: 92.3374572853
+Validation accuracy: 0.91408 Validation AUC: 92.7429739678 Best Validation AUC: 93.5505213533
+
+Epoch: 197 Train accuracy: 0.91972 Train AUC: 93.0587515335
+Validation accuracy: 0.916446 Validation AUC: 93.0681560957 Best Validation AUC: 93.5505213533
+
+Epoch: 198 Train accuracy: 0.920443 Train AUC: 93.4058403009
+Validation accuracy: 0.919123 Validation AUC: 93.5305622016 Best Validation AUC: 93.5505213533
+
+Epoch: 199 Train accuracy: 0.917058 Train AUC: 92.7817142011
+Validation accuracy: 0.914018 Validation AUC: 92.7230340567 Best Validation AUC: 93.5505213533
+
+Epoch: 200 Train accuracy: 0.917416 Train AUC: 93.1129380023
+Validation accuracy: 0.916508 Validation AUC: 93.4013870335 Best Validation AUC: 93.5505213533
+
+Execution time: 00:05:42
+--------------------- Training Finished ---------------------
+
+--------------------- (4) Starting test ---------------------
+
+Test accuracy: 0.925694
+Test AUC: 92.9789637624
+Execution time: 00:00:00
+--------------------- Test Finished ---------------------
