@@ -314,8 +314,9 @@ class DNN(object):
         y_score = self.predict(x_test, model_path)
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
         roc_auc = auc(fpr, tpr)
+        roc_auc *= 100
         plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc*100)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])

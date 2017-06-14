@@ -317,7 +317,7 @@ if __name__ == '__main__':
                       help='Batch size used during training.')
   parser.add_argument('--learning_rate', type=float, default=0.001,
                       help='Initial learning rate.')
-  parser.add_argument('--dropout', type=float, default=0.5,
+  parser.add_argument('--dropout', type=float, default=None,
                       help='Keep probability for training dropout. Use None to avoid using dropout')
   parser.add_argument('--activation_function', type=str, default='elu',
                       help='Activation function to use in the hidden layers: elu, relu, leaky_relu, sigmoid, tanh, identity.')
