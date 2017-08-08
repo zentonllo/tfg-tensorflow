@@ -8,11 +8,6 @@ Author: Alberto Terceño Ortega
 """
 TODO
 
-
--- Fork de los dnn binarios y multiclase
--- Pruebas con un dnn binario con una neurona al final y con función sigmoide (rendimiento?)
-
-
 --------------------------------
 -- Investigar ejemplos ML engine (census)
 -- Investigar api python google analytics

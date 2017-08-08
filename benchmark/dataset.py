@@ -73,6 +73,7 @@ class Dataset(object):
         
         self._num_examples = x_train.shape[0]
         self._num_features = x_train.shape[1]
+        self._num_classes = len(np.unique(y_data))
 
         self.x_train = x_train
         self.y_train = y_train

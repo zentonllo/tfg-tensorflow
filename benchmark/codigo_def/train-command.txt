@@ -1,1 +1,0 @@
-python .\playground.py --train_file creditcards --hidden_layers 20 15 --epochs 500 --batch_size 100 --dropout 0.5

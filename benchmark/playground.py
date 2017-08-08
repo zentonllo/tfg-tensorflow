@@ -7,15 +7,13 @@ Created on Fri May 26 11:03:21 2017
 import tensorflow as tf
 import argparse
 from dataset import Dataset
-
-from nn import *
-
+from dnn_multiclass import *
+# Uncomment the next line and comment the previous one if you want to use dnn with just one output neuron
+# from dnn_binary import *
 import sys
 import os
-
 from os.path import abspath
 from leaky_relu import leaky_relu
-
 from datetime import datetime
 
 # Disable info warnings from TF
@@ -27,7 +25,7 @@ FLAGS = None
 # Default log-dir
 NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
 DEFAULT_ROOT_LOGDIR = '/tmp'
-DEFAULT_LOG_DIR = "{}/run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
+DEFAULT_LOG_DIR = "{}/playground-run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
 
 # Default value for Momentum optimizer
 MOMENTUM_PARAM = 0.9
@@ -207,7 +205,7 @@ def main(_):
     sys.stdout = open(OUTPUT_FILE, "w")
     
     # El path va sin la extensión. El módulo Dataset se encarga de adjuntar la extensión
-    dataset_path = FLAGS.train_file
+    dataset_path = FLAGS.dataset_file
     
     
     # Carga del dataset 
@@ -225,8 +223,8 @@ def main(_):
     # We start to parse the hyperparameters 
     n_inputs  = dataset._num_features
     
-    # Binary classification playground
-    n_outputs = 2
+    # Binary or multiclass classification playground
+    n_outputs = dataset._num_classes
     
     
     
@@ -304,10 +302,10 @@ def main(_):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   
-  parser.add_argument('--train_file',
+  parser.add_argument('--dataset_file',
                       required=True,
                       type=str,
-                      help='Path for the training csv file. Do not include the .csv extension! All the csv columns must be numeric. Label column in the csv is the last one.')
+                      help='Path for the dataset. Do not include the .csv or .npy extension! All the csv columns must be numeric. Label column in the csv is the last one.')
   parser.add_argument('--hidden_layers',
                       type=int,
                       default=None,
@@ -320,7 +318,7 @@ if __name__ == '__main__':
   parser.add_argument('--learning_rate', type=float, default=0.001,
                       help='Initial learning rate.')
   parser.add_argument('--dropout', type=float, default=None,
-                      help='Keep probability for training dropout. Use None to avoid using dropout')
+                      help='Keep probability for training dropout, ie 1-dropout_rate. Use None to avoid using dropout')
   parser.add_argument('--activation_function', type=str, default='elu',
                       help='Activation function to use in the hidden layers: elu, relu, leaky_relu, sigmoid, tanh, identity.')
   parser.add_argument('--optimizer', type=str, default='adam',
