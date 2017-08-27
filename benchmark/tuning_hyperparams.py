@@ -47,7 +47,7 @@ def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
     print("Dropout keep prob rate (None if not used):", kp)
     print("Batch size:", bs)
     print("Regularizer (None if not used):", reg)
-    print("Batch normalization (Yes = 1, No = 0):", bn)
+    print("Batch normalization (Yes = 0, No = 1):", bn)
     print("Optimizer:", opt, "\n")
 
 NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
@@ -67,7 +67,7 @@ sys.stdout = open(OUTPUT_FILE, "w")
 ######################################## Choose a dataset path #####################################################
 ####################################################################################################################
 
-dataset_name = 'creditcards'
+dataset_name = 'creditcard'
 
 ###################################################################################################################
 ###################################################################################################################
@@ -76,14 +76,14 @@ dataset_name = 'creditcards'
 ######################################## Choose lists of hyperparameters to test ##################################
 ###################################################################################################################
 
-nb_epochs = 30
+nb_epochs = 100
 
 # Use np.linspace() to get several values between a minimum and a maximum
-learning_rate_list = [0.1,0.5]
-#learning_rate_list = [0.001]
+#learning_rate_list = [0.1,0.5]
+learning_rate_list = [0.001]
 
-activation_function_list = [tf.nn.elu]
-#activation_function_list = [tf.nn.relu, tf.nn.elu]
+#activation_function_list = [tf.nn.elu]
+activation_function_list = [tf.nn.relu, tf.nn.elu]
 
 keep_prob_list = [None]
 #keep_prob_list = [0.2,0.4,0.5,0.7]
@@ -93,7 +93,7 @@ batch_size_list = [100]
 regularizer_list = [None]
 #beta = 0.001
 #regularizer_list = [None,tf.contrib.layers.l1_regularizer(scale=beta, scope=None),  tf.contrib.layers.l2_regularizer(scale=beta, scope=None)]
-'''
+#'''
 normalizer_fn_list = [batch_norm]
 normalizer_params_list = [{
         'is_training': None,
@@ -102,13 +102,13 @@ normalizer_params_list = [{
         'scale': True,
     }]
 '''
-normalizer_fn_list = [None, batch_norm]
-normalizer_params_list = [None, {
+normalizer_fn_list = [batch_norm, None]
+normalizer_params_list = [{
         'is_training': None,
         'decay': 0.9,
         'updates_collections': None,
         'scale': True,
-    }]
+    }, None]
 #'''
 
 optimizers_list = [tf.train.AdamOptimizer]
@@ -125,7 +125,7 @@ y_test = dataset.y_test
 n_inputs = dataset._num_features
 n_outputs = dataset._num_classes
 #hidden_lists= [[n_inputs, 10, 5, n_outputs], [n_inputs, 10, n_outputs], [n_inputs, 3, n_outputs]]
-hidden_lists= [[n_inputs, 10, n_outputs], [n_inputs, 3, n_outputs]]
+hidden_lists= [[n_inputs, 15, 5, n_outputs], [n_inputs, 10, n_outputs], [n_inputs, 3, n_outputs]]
 
 
 ####################################################################################################################
@@ -145,7 +145,7 @@ for learning_rate in learning_rate_list:
                         for i in range(len(normalizer_fn_list)):
                             for optimizer in optimizers_list:
                                 
-                                log_dir_model = DEFAULT_LOG_DIR + "/model" + str(it) 
+                                log_dir_model = DEFAULT_LOG_DIR + "/model" + str(it+1) 
                                 os.makedirs(log_dir_model, exist_ok=True)
                                 os.makedirs(log_dir_model + "/model_tuning", exist_ok=True)
                                 os.makedirs(log_dir_model + "/train_tuning", exist_ok=True)
@@ -161,8 +161,8 @@ for learning_rate in learning_rate_list:
                                           normalizer_params = normalizer_params_list[i],
                                           optimizer = optimizer(learning_rate, name='optimizer'))
                                 
-                                model_path = log_dir_model + "/model_tuning/DNN" + str(it) + ".ckpt"
-                                train_path = log_dir_model + "/train_tuning/DNN" + str(it) + ".ckpt"
+                                model_path = log_dir_model + "/model_tuning/DNN" + str(it+1) + ".ckpt"
+                                train_path = log_dir_model + "/train_tuning/DNN" + str(it+1) + ".ckpt"
                                 
                                 print("--------------------- Model", it+1, " ------------------------")
                                 print("-------------------------------------------------------", "\n" )

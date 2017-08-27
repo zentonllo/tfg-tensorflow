@@ -1,3 +1,0 @@
-model_checkpoint_path: "C:/tmp/run-2017-05-29--12h24m18s/training/DNN_tr.ckpt"
-all_model_checkpoint_paths: "C:/tmp/run-2017-05-29--12h24m18s/model/DNN.ckpt"
-all_model_checkpoint_paths: "C:/tmp/run-2017-05-29--12h24m18s/training/DNN_tr.ckpt"

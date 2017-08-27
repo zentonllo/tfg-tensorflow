@@ -323,8 +323,10 @@ if __name__ == '__main__':
                       help='Activation function to use in the hidden layers: elu, relu, leaky_relu, sigmoid, tanh, identity.')
   parser.add_argument('--optimizer', type=str, default='adam',
                       help='Optimization method to use during training: adam, adagrad, rms_prop, ftrl, adadelta, momentum, grad_descent.')
-  parser.add_argument('--batch_norm', type=bool, default=True,
+  parser.add_argument('--batch_norm', dest='batch_norm', action='store_true', default=True,
                       help='Indicate whether to use batch normalization.')
+  parser.add_argument('--no_batch_norm', dest='batch_norm', action='store_false', default=False,
+                      help='Indicate whether to avoid batch normalization.')
   parser.add_argument('--regularization', type=str, default=None,
                       help='Indicate whether to use L1 or L2 regularization. Use None to avoid regularization')
   parser.add_argument('--reg_param', type=float, default=None,

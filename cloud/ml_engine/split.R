@@ -1,3 +1,8 @@
+if (!require(rio)) {
+  install.packages("rio")
+}
+
+
 # Script que realiza un undersampling y particionado de los datos en conjuntos de test y validación
 # para su posterior uso en ml engine. 
 # Nota: estos dos archivos csv generados se subirán manualmente a Cloud Storage
@@ -7,7 +12,7 @@
 PATH <- "B:/Descargas/creditcard.csv"
 
 # Leemos el csv y hacemos undersampling con ratio 50-50
-data <- read.csv(PATH)
+data <- import(PATH)
 
 # En vez de indicar con 1 o 0 la variable que indica si hubo fraude,
 # se utilizan strings, dado que se aprovecha el esqueleto de código
