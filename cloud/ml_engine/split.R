@@ -1,22 +1,18 @@
+# Load 'rio' package to import (and export) datasets
 if (!require(rio)) {
   install.packages("rio")
 }
 
+# This script undersamples and splits a dataset into training and validation sets
+# in order to use them afterwards in ML Engine
 
-# Script que realiza un undersampling y particionado de los datos en conjuntos de test y validación
-# para su posterior uso en ml engine. 
-# Nota: estos dos archivos csv generados se subirán manualmente a Cloud Storage
-
-
-# Ruta del csv
+# CSV Path
 PATH <- "B:/Descargas/creditcard.csv"
 
-# Leemos el csv y hacemos undersampling con ratio 50-50
+# We read the csv and then undersampling is performed
 data <- import(PATH)
 
-# En vez de indicar con 1 o 0 la variable que indica si hubo fraude,
-# se utilizan strings, dado que se aprovecha el esqueleto de código
-# utilizado para ml engine
+# In this case strings are used as labels since we can easily adapt the Census sample for ML Engine
 df <- data[which(data$Class == 1),]
 df$Class <- "fraud"
 
@@ -24,23 +20,25 @@ df2 <- data[which(data$Class == 0),]
 df2 <- df2[sample(nrow(df2), nrow(df)), ]
 df2$Class <- "notfraud"
 
-# Unimos los dos dataframes anteriores y permutamos las filass
+# Bind both dataframes and shuffle them
 result <- rbind(df,df2)
 result <- result[sample(nrow(result), nrow(result)), ]
 
-# Porcentaje para los conjuntos de entrenamiento y test (80% y 20% respectivamente)
+# Training and validation percentages (80% and 20% resp.)
 TRAIN_SIZE <- 0.8
 tr <- as.integer(nrow(result)*TRAIN_SIZE)
 
-# Obtenemos los conjuntos de entrenamiento y test
 train <- result[1:tr,]
 test <- result[(tr+1):nrow(result),]
 
 
-# Rutas para guardar los csv resultantes
+# Paths used to export the CSV files
 TRAIN_PATH <- "B:/Descargas/creditcard.data.csv"
 TEST_PATH <- "B:/Descargas/creditcard.test.csv"
 
-# Guardamos los csv
 write.table(train, TRAIN_PATH,row.names = FALSE, col.names = FALSE, sep=",")
 write.table(test, TEST_PATH, row.names = FALSE, col.names = FALSE, sep=",")
+
+# Another possibility using 'rio' package
+# export(train, TRAIN_PATH)
+# export(test, TEST_PATH)

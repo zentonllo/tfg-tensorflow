@@ -1,3 +1,7 @@
+# Code obtained from: https://github.com/GoogleCloudPlatform/cloudml-samples/blob/master/census/estimator/trainer/task.py
+# Hyperparameters modified to get better results with the Credit Card Fraud Dataset
+
+
 import argparse
 import os
 
@@ -196,7 +200,7 @@ if __name__ == '__main__':
               default_output_alternative_key=None,
           )]
       ),
-      #save_checkpoints_steps=15
+      # We save a checkpoint every 15 epochs
       run_config=run_config.RunConfig(model_dir=args.job_dir, save_checkpoints_steps=15),
       hparams=hparam.HParams(**args.__dict__)
   )

@@ -1,28 +1,26 @@
 """
-Obtenido a partir de ejemplos de tensorflow.org y del libro de Aurelien Geron sobre Machine Learning
+Module used to model Deep Neural Networks which solve multiclass classification problems (>1 output neuron)
 
+Code obtained and adapted from:
 
-Author: Alberto Terceño Ortega
+https://www.tensorflow.org/get_started/
+https://github.com/ageron/handson-ml/blob/master/11_deep_learning.ipynb
+https://github.com/aymericdamien/TensorFlow-Examples
+https://github.com/zentonllo/gcom
+
 """
 
 """
 TODO
 
 
---------------------------------
--- Trabajo futuro
-
--- Incluir tsne en el playground (scikit learn y luego pasar al embedding de Tensorboard)
--- Codificación de variables cualitativas a cuantitativas
--- Investigar Python VTreat
--- Añadir interval evaluation en Keras y funcionalidades extra (BN, etc...)
--- Cross Validation 
--- División elegante en módulos como ejemplos de MNIST
--- Usar pandas en un jupyter notebook para preprocesar csv
--- Incluir local response normalization y data augmentation?
--- Imágenes png pasarlas a tensorboard (gyglim)
--- Se podría usar tf.metrics.auc sin inicializar variables locales?
-
+-- Include tsne algorithm and then try to generate TensorBoard embeddings 
+-- Try to generate numerical features from categorical ones (word2vec and dummy variables)
+-- Add cross validation (Kfold validation for instance)
+-- Try to keep separating modules in different scripts such as the TF MNIST samples
+-- Include Local response normalization and data augmentation tools
+-- Put custom png files (ROC curve and CM) in TensorBoard
+-- Keep investigating on tf.metrics.auc (try to replace sklearn helper functions)
 
 
 """
@@ -44,7 +42,7 @@ from sklearn.metrics import auc, roc_auc_score, roc_curve, confusion_matrix
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 
-
+# Source: https://www.tensorflow.org/get_started/summaries_and_tensorboard
 def variable_summaries(var):
   """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
   with tf.name_scope('summaries'):
@@ -58,6 +56,7 @@ def variable_summaries(var):
     tf.summary.histogram('histogram', var)
 
 def print_execution_time(start, end):
+    """Helper function to print execution times properly formatted."""
     hours, rem = divmod(end-start, 3600)
     minutes, seconds = divmod(rem, 60)
     print("Execution time:","{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
@@ -99,9 +98,41 @@ El optimizer debe estar instanciado, ej: tf.train.AdamOptimizer(learning_rate=0.
 """
 
 
-# 2 outputs para problemas de clasificación binaria
+
 class DNN(object):
+        """Class that models a Deep Neural Network with several output neurons
     
+    There are training and predicting methods, as well as tools that generate plots.
+    Most of the neural network hyperparameters are set when a class object is instanciated.
+
+    
+    Attributes
+    ----------
+    file_writer :
+        tf.summary.FileWriter object which adds summaries to TensorBoard 
+    saver :
+        tf.train.Saver() used to save the model
+    merged :
+        TF node that if it is executed will generate the TensorBoard summaries
+    hidden_list : 
+        List with the following shape [input_neurons, neurons_hidden_layer_1, neurons_hidden_layer_2, ..., 1]
+    activation_function : 
+        TF activation function (tf.nn.relu, tf.nn.elu, tf.nn.sigmoid, tf.nn.tanh, tf.nn.identity, etc.)
+    keep_prob :
+        Probability to keep a neuron active during dropout (that is, 1 - dropout_rate, use None to avoid dropout)
+    regularizer :
+        TF regularizer to use (tf.contrib.layers.l1_regularizer(scale=beta, scope=None), tf.contrib.layers.l2_regularizer(scale=beta, scope=None))
+    normalizer_fn : 
+        Normalizer function to use. Use batch_norm for batch normalization and None to avoid normalizer functions
+    normalizer_params : 
+        Extra parameters for the normalizer function
+    optimizer : 
+        TF Optimizer during Gradient Descent (tf.train.AdamOptimizer, tf.train.RMSPropOptimizer, tf.train.AdadeltaOptimizer or tf.train.AdagradOptimizer)
+    log_dir : 
+        Path used to save all the needed TensorFlow and TensorBoard information to save (graph, models, etc.)
+    batch_size : 
+        Batch size to be used during training
+    """
     
     def __init__(self,
                  log_dir,
@@ -114,11 +145,36 @@ class DNN(object):
                  optimizer = tf.train.AdamOptimizer(learning_rate=0.001, name='optimizer')
                ):
         
+        """__init__ method for the DNN class
+
+        Saves the hyperparameters as attributes and instatiates a deep neural network
+
+        Parameters
+        ----------
+        log_dir : 
+            Path used to save all the needed TensorFlow and TensorBoard information to save (graph, models, etc.)
+        hidden_list : 
+            List with the following shape [input_neurons, neurons_hidden_layer_1, neurons_hidden_layer_2, ..., 1]
+        activation_function : 
+            TF activation function (tf.nn.relu, tf.nn.elu, tf.nn.sigmoid, tf.nn.tanh, tf.nn.identity, etc.)
+        keep_prob :
+            Probability to keep a neuron active during dropout (that is, 1 - dropout_rate, use None to avoid dropout)
+        regularizer :
+            TF regularizer to use (tf.contrib.layers.l1_regularizer(scale=beta, scope=None), tf.contrib.layers.l2_regularizer(scale=beta, scope=None))
+        normalizer_fn : 
+            Normalizer function to use. Use batch_norm for batch normalization and None to avoid normalizer functions
+        normalizer_params : 
+            Extra parameters for the normalizer function
+        optimizer : 
+            TF Optimizer during Gradient Descent (tf.train.AdamOptimizer, tf.train.RMSPropOptimizer, tf.train.AdadeltaOptimizer or tf.train.AdagradOptimizer)
+
+        """
+
+        # Create a new TF graph from scratch
         tf.reset_default_graph()
         self.file_writer = None
         self.saver = None
         self.merged = None
-        self.learning_rate = 0.001
         self.hidden_list = hidden_list
         self.activation_function = activation_function
         self.keep_prob = keep_prob
@@ -129,9 +185,16 @@ class DNN(object):
         self.log_dir = log_dir
         self.batch_size = None
         
+        # Instantiate the neural network
         self.create_net()
     
     def create_net(self):
+        """Method that instatiates a neural network using the hyperparameters passed to the DNN object. 
+        
+        Most of the code was obtained and adapted from 
+        https://github.com/ageron/handson-ml/blob/master/11_deep_learning.ipynb
+        """
+
         hidden_list = self.hidden_list
         n_inputs = hidden_list[0]
         n_outputs = hidden_list[-1]
@@ -145,7 +208,7 @@ class DNN(object):
             
         with tf.name_scope("dnn"):
             he_init = tf.contrib.layers.variance_scaling_initializer()
-        
+            
             with arg_scope(
                     [fully_connected],
                     activation_fn=self.activation_function,
@@ -153,6 +216,7 @@ class DNN(object):
                     normalizer_fn=self.normalizer_fn,
                     normalizer_params=self.normalizer_params):
                 
+                # Build the fully-connected layers
                 Z = self.X
                 n_iter = len(hidden_list[1:])
                 for i in range(1,n_iter):
@@ -161,13 +225,12 @@ class DNN(object):
                     if self.keep_prob is not None:
                         Z = dropout(Z, self.keep_prob, is_training=self.is_training)
             
-            # Batch normalization en la ultima capa?
             self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, normalizer_fn=self.normalizer_fn, normalizer_params=self.normalizer_params, scope="outputs")
-            #self.logits = fully_connected(inputs=Z, num_outputs=n_outputs, activation_fn=None, weights_initializer=he_init, scope="outputs")
             with tf.name_scope("softmaxed_output"):
                 self.softmaxed_logits = tf.nn.softmax(self.logits)     
             
         with tf.name_scope("loss"):
+            # Compute softmax cross entropy
             xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits) 
             self.loss = tf.reduce_mean(xentropy)
             if self.regularizer is not None:
@@ -177,6 +240,7 @@ class DNN(object):
             
         with tf.name_scope("train"):
             opt = self.optimizer
+            # Minimize the loss function
             self.train_step = opt.minimize(self.loss, name='train_step')
 
         with tf.name_scope("eval"):
@@ -184,7 +248,7 @@ class DNN(object):
             self.accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
         tf.summary.scalar('accuracy', self.accuracy)
         
-        # Summaries en Tensorboard de los pesos de las capas de la red neuronal
+        # TensorBoard summaries for the hidden layers weights
         for i in range(1,n_iter):
             with tf.variable_scope('hidden'+str(i), reuse=True):
                 variable_summaries(tf.get_variable('weights'))
@@ -198,9 +262,22 @@ class DNN(object):
     
         self.saver = tf.train.Saver()
     
-    # Wrapper para el training
     def feed_dict(self, dataset, mode):
-        
+        """Method that builds a dictionary to feed the neuronal network. 
+
+        Parameters
+        ----------
+        dataset :
+            Dataset object
+        mode : 
+            String that points which feed dictionary we want to get. Possible values: 'batch_training', 'training_test', 'validation_test'
+
+        Returns
+        -------
+        fd
+            Dictionary that feeds the TensorFlow model
+        """
+
         fd = None
         if mode is 'batch_training':
             x_batch, y_batch = dataset.next_batch(self.batch_size)
@@ -213,7 +290,29 @@ class DNN(object):
         return fd
     
     def train(self, dataset, model_path, train_path, nb_epochs=100, batch_size=10, silent_mode=False):
-        
+        """Method that trains a deep neuronal network. 
+
+        Parameters
+        ----------
+        dataset :
+            Dataset object
+        model_path : 
+            Path where the optimal TensorFlow model will be saved
+        train_path : 
+            Path where the training TensorFlow models will be saved. After the training process, the model trained in the very last epoch will
+            be the only one saved
+        nb_epochs : 
+            Number of epochs to train the model
+        batch_size : 
+            Batch size to be used during training
+        silent_mode : 
+            Flag which enables whether to print progress on the terminal during training.
+
+        Returns
+        -------
+        None
+        """
+
         start_time = time.time()
         
         x_training = dataset.x_train
@@ -223,10 +322,11 @@ class DNN(object):
         y_validation = dataset.y_val
         
         nb_data = dataset._num_examples
-        # nb_batches = nb_data // batch_size
+        # nb_batches = nb_data // batch_size (integer division)
         self.batch_size= batch_size
         nb_batches = int(nb_data/batch_size)
         
+        # Records best validation AUC during training, which will allow to save that model as optimal
         best_auc = 0
         self.aucs = []
 
@@ -235,21 +335,22 @@ class DNN(object):
             
             self.file_writer = tf.summary.FileWriter(self.log_dir, sess.graph)
             for epoch in range(nb_epochs):
+                # Iterate through batches and keep training
                 for batch in range(nb_batches):
                     sess.run(self.train_step,
                              feed_dict=self.feed_dict(dataset, mode='batch_training'))
                 self.saver.save(sess, train_path)
                 
-                # Correr los summaries con los datos del batch?
+                # Get the summaries for TensorBoard
                 summary = sess.run(self.merged, feed_dict=self.feed_dict(dataset, mode='training_test'))
                 self.file_writer.add_summary(summary, epoch)
                 
-                # Añadimos el auc_roc sobre validacion de esta manera, pues usar tf.metrics.auc requiere inicializar variables locales, lo cual no he logrado conseguir en el código
+                # We use a sklearn function to compute AUC. Couldn't manage to make tf.metrics.auc work due to some odd 'local variables'
                 cur_auc = self.auc_roc(x_validation, y_validation, train_path)
                 summary_auc = tf.Summary(value=[tf.Summary.Value(tag="AUCs_Validation", simple_value=cur_auc)])
                 self.file_writer.add_summary(summary_auc, epoch)
                 
-
+                # Only save best model if it gets the best AUC over the validation set
                 if cur_auc > best_auc:
                     best_auc = cur_auc
                     self.saver.save(sess, model_path)
@@ -271,19 +372,66 @@ class DNN(object):
     
     # Da la probabilidad de num_class para los x_test
     def predict(self, x_test, model_path, num_class=1):
+        """Method that gets predictions from a trained deep neuronal network. 
+
+        Get a Numpy array of predictions P(y=num_class| W) for all the x_test
+
+        Parameters
+        ----------
+        x_test :
+            Numpy Array with data test to get predictions for
+        model_path : 
+            Path where the TensorFlow model is located
+        num_class : 
+            Number of the class to get predictions for
+
+        Returns
+        -------
+        Numpy array with predictions (probabilities between 0 and 1)
+        """
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
             y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
         return y_pred[:,num_class]
     
-    # Predice la clase para los x_test (es decir, toma el máximo de las probabilidades de salida)
     def predict_class(self, x_test, model_path):
+        """Method that gets predicted classes (0,1,2,etc.) from a trained deep neuronal network. 
+
+        Get a Numpy array of predicted classes for all the x_test. It simply takes the maximum probability for each row in the test data
+
+        Parameters
+        ----------
+        x_test :
+            Numpy array with data test to get their predicted classes
+        model_path : 
+            Path where the TensorFlow model is located
+
+        Returns
+        -------
+        Numpy array with predicted classes (0,1,2,etc.)
+        """
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
             y_pred = sess.run(self.softmaxed_logits, feed_dict={self.is_training: False, self.X: x_test})
             return tf.argmax(y_pred,1).eval()
     
     def test(self, x_test, y_test, model_path):
+        """Method that prints accuracy and AUC for test data after getting predictions a trained deep neuronal network. 
+
+
+        Parameters
+        ----------
+        x_test :
+            Numpy array with data test to get their predicted classes
+        y_test : 
+            Numpy array with the labels belonging to x_test
+        model_path : 
+            Path where the TensorFlow model is located
+
+        Returns
+        -------
+        None
+        """
         start_time = time.time()
         with tf.Session() as sess:
             self.saver.restore(sess, model_path)
@@ -296,12 +444,46 @@ class DNN(object):
 
 
     def auc_roc(self, x_test, y_test, model_path):
+        """Method that computes AUC for some data after getting predictions from a trained deep neural network. 
+
+
+        Parameters
+        ----------
+        x_test :
+            Numpy array with data test to get their predicted classes
+        y_test : 
+            Numpy array with the labels belonging to x_test
+        model_path : 
+            Path where the TensorFlow model is located
+
+        Returns
+        -------
+        AUC value for the test data (x_test and y_test)
+        """
         y_score = self.predict(x_test, model_path)
         auc = roc_auc_score(y_true=y_test, y_score=y_score)
         return auc*100
     
     
     def save_roc(self, x_test, y_test, model_path, roc_path):
+        """Method that computes a ROC curve from a model and save it as a png file. 
+
+
+        Parameters
+        ----------
+        x_test :
+            Numpy array with data test to get their predicted classes
+        y_test : 
+            Numpy array with the labels belonging to x_test
+        model_path : 
+            Path where the TensorFlow model is located
+        roc_path :
+            Path that points where to save the png file with the ROC curve
+
+        Returns
+        -------
+        None
+        """
         y_score = self.predict(x_test, model_path)
         fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=y_score)
         roc_auc = auc(fpr, tpr)
@@ -317,9 +499,27 @@ class DNN(object):
         plt.savefig(roc_path, bbox_inches='tight')
         
         
-
-    # Classes: vector con strings para las clases
     def save_cm(self, x_test, y_test, model_path, cm_path, classes, normalize=True):
+        """Method that computes a confusion matrix from a model and save it as a png file. 
+
+
+        Parameters
+        ----------
+        x_test :
+            Numpy array with data test to get their predicted classes
+        y_test : 
+            Numpy array with the labels belonging to x_test
+        model_path : 
+            Path where the TensorFlow model is located
+        cm_path :
+            Path that points where to save the png file with the confusion matrix
+        classes : 
+            List with labels for the confusion matrix rows and columns. For instance: ['Normal Transactions', 'Fraudulent transactions']
+
+        Returns
+        -------
+        None
+        """
         y_pred = self.predict_class(x_test, model_path)
         cm = confusion_matrix(y_test, y_pred)
         np.set_printoptions(precision=2)
@@ -353,43 +553,3 @@ class DNN(object):
         
         plt.savefig(cm_path, bbox_inches='tight')
         
-
-if __name__ == "__main__":
-    # Test using a Kaggle dataset (credit card fraud detection) 
-    # with hardcoded hyperparams in a playground
-    # URL: https://www.kaggle.com/dalpozz/creditcardfraud
-    exec(open('test_playground.py').read())
-    
-    
-    
-"""
-
-def _get_streaming_metrics(prediction,label,num_classes):
-
-    with tf.name_scope("test"):
-        # the streaming accuracy (lookup and update tensors)
-        accuracy,accuracy_update = tf.metrics.accuracy(label, prediction, 
-                                               name='accuracy')
-        # Compute a per-batch confusion
-        batch_confusion = tf.confusion_matrix(label, prediction,
-                                             num_classes=num_classes,
-                                             name='batch_confusion')
-        # Create an accumulator variable to hold the counts
-        confusion = tf.Variable( tf.zeros([num_classes,num_classes], 
-                                          dtype=tf.int32 ),
-                                 name='confusion' )
-        # Create the update op for doing a "+=" accumulation on the batch
-        confusion_update = confusion.assign( confusion + batch_confusion )
-        # Cast counts to float so tf.summary.image renormalizes to [0,255]
-        confusion_image = tf.reshape( tf.cast( confusion, tf.float32),
-                                  [1, num_classes, num_classes, 1])
-        # Combine streaming accuracy and confusion matrix updates in one op
-        test_op = tf.group(accuracy_update, confusion_update)
-
-        tf.summary.image('confusion',confusion_image)
-        tf.summary.scalar('accuracy',accuracy)
-
-    return test_op,accuracy,confusion
-
-
-"""

@@ -11,6 +11,9 @@
 
 """Define a Wide + Deep model for classification on structured data."""
 
+# Obtained from: https://github.com/GoogleCloudPlatform/cloudml-samples/blob/master/census/estimator/trainer/model.py
+# Modified to use a Wide and Deep Model over the Credit Card Fraud Dataset
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -25,23 +28,14 @@ CSV_COLUMNS = [ 'time', 'v1', 'v2','v3','v4','v5','v6','v7','v8','v9','v10','v11
                'v12','v13','v14','v15','v16','v17','v18','v19','v20','v21','v22','v23','v24',
                'v25','v26','v27', 'v28','amount','class']               
 
-#CSV_COLUMNS = ['age', 'workclass', 'fnlwgt', 'education', 'education_num',
-#               'marital_status', 'occupation', 'relationship', 'race', 'gender',
-#               'capital_gain', 'capital_loss', 'hours_per_week',
-#               'native_country', 'income_bracket']
-
-#CSV_COLUMN_DEFAULTS = [[0], [''], [0], [''], [0], [''], [''], [''], [''], [''],
-#                       [0], [0], [0], [''], ['']]
-
-
+# We include these defaults in order to force float castings during the CSV parsing
 CSV_COLUMN_DEFAULTS = [[0.3], [-0.3], [-0.3], [-0.3], [-0.3], [-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],
                        [-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],
                        [-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[-0.3],[0.3],['']]
 
-#LABEL_COLUMN = 'income_bracket'
+
 LABEL_COLUMN = 'class'
 
-#LABELS = [' <=50K', ' >50K']
 LABELS = ['fraud', 'notfraud']
 
 # Define the initial ingestion of each feature used by your model.
@@ -124,11 +118,13 @@ def build_estimator(config, embedding_size=8, hidden_units=None):
   
   # Reused Transformations.
   # Continuous columns can be converted to categorical via bucketization
+  # We use the (bucketized) amount column in the Wide part
   amount_buckets = tf.feature_column.bucketized_column(amount, boundaries=[4,8,12,15,35,75,100, 200, 300, 1000])
 
   # Wide columns and deep columns.
   wide_columns = [amount_buckets]
 
+  # All the other CCF features will be used in the deep part
   deep_columns = [
    time, v1, v2, v3, v4,
    v5, v6, v7, v8, v9, 
@@ -137,8 +133,10 @@ def build_estimator(config, embedding_size=8, hidden_units=None):
    v22,v23,v24,v25,v26,v27,v28
   ]
   
-  # Podemos hardcodear aquí las neuronas en cada capa oculta
+  # We hardcode here the models in order to avoid the exponential decaying model which is already implemented
   hidden_units = [20,15]
+
+  # We can try either Wide and Deep models or Deep Neural Networks (DNN)
   #"""
   return tf.contrib.learn.DNNLinearCombinedClassifier(
       config=config,

@@ -1,20 +1,25 @@
 trainingInput:
   hyperparameters:
+    # We try to maximize the AUC metric
     goal: MAXIMIZE
     hyperparameterMetricTag: auc
+    # 15 trainings, max. 3 concurrently
     maxTrials: 15
     maxParallelTrials: 3
     params:
+        # Number of neurons in the first layer
       - parameterName: first-layer-size
         type: INTEGER
         minValue: 2
         maxValue: 25
         scaleType: UNIT_LINEAR_SCALE
+        # Number of hidden layers
       - parameterName: num-layers
         type: INTEGER
         minValue: 1
         maxValue: 15
         scaleType: UNIT_LINEAR_SCALE
+        # Scale factor which keeps decreasing units in the deep layers
       - parameterName: scale-factor
         type: DOUBLE
         minValue: 0.1
