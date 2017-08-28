@@ -21,14 +21,14 @@ import pandas as pd
 from os.path import isfile, abspath
 
 class Dataset(object):
-	 """Class used to model a dataset in Python
-	
-	It allows to read datasets from csv and npy files, request batches and some general
-	information about the dataset.
-	This class also splits the dataset into training, validation and test sets 
+    """Class used to model a dataset in Python
 
-    
-	Attributes
+    It allows to read datasets from csv and npy files, request batches and some general
+    information about the dataset.
+    This class also splits the dataset into training, validation and test sets 
+
+
+    Attributes
     ----------
     _num_examples :
         Number of rows in the dataset 
@@ -54,8 +54,9 @@ class Dataset(object):
         Label column (Numpy array) for the x_test attribute
 
     """
-    
+
     def __init__(self, path, train_percentage=0.8, test_percentage=0.1):
+
         """__init__ method for the Dataset class
 
         Reads a dataset and performs the split into training, validation and test sets according to the split parameters. 
@@ -70,20 +71,19 @@ class Dataset(object):
            train_percentage + test_percentage should be less or equal to one
         test_percentage :
            Percentage of rows to be used as test set. train_percentage + test_percentage should be less or equal to one
-
         """
 
         # We use the spare percentage for the validation set
         val_percentage = 1 - (train_percentage + test_percentage)
         assert (train_percentage+test_percentage+val_percentage)==1, (
                 'train_percentage: %s, validation_percentage: %s, test_percentage: %s' % (train_percentage*100, val_percentage*100, test_percentage*100) )
-        
-        
-        
+
+
+
         np_file =  abspath(path + '.npy')
         csv_file = abspath(path + '.csv')
-        
-        
+
+
         data = None
         # Check if the Numpy file exists. If not, it is generated, so we can get delete the csv file.
         if isfile(np_file):
@@ -92,57 +92,57 @@ class Dataset(object):
         	# We skip the header (first row) since we just need the data itself as a Numpy array
             data = pd.read_csv(csv_file, header=None, skiprows = 1).as_matrix()
             np.save(np_file, data)
-        
+
         # Shuffling the dataset
         np.random.shuffle(data)
-        
+
         # Split the dataset
         x_data = data[:,:-1]
         y_data = data[:,-1]
-        
+
         dataset_samples = x_data.shape[0]
-        
+
         tr_limit = int(dataset_samples*train_percentage)
-        
+
         x_train = x_data[:tr_limit,:]
         y_train = y_data[:tr_limit]
 
         val_limit = int(dataset_samples*(train_percentage+val_percentage))
-        
+
         x_val = x_data[tr_limit:val_limit,:]
         y_val = y_data[tr_limit:val_limit]
-        
+
         x_test = x_data[val_limit:,:]
         y_test = y_data[val_limit:]
-        
+
         # We just treat numerical features. This cast is made in order to use
         # the same type in the benchmark scripts
         x_train = x_train.astype('float32')
         x_test = x_test.astype('float32')
-        
+
 
         assert x_train.shape[0] == y_train.shape[0], (
               'x_train.shape: %s y_train.shape: %s' % (x_train.shape, y_train.shape))
-        
+
         self._num_examples = x_train.shape[0]
         self._num_features = x_train.shape[1]
         self._num_classes = len(np.unique(y_data))
 
         self.x_train = x_train
         self.y_train = y_train
-        
+
         self.x_val = x_val
         self.y_val = y_val
-        
+
         self.x_test = x_test
         self.y_test = y_test
-        
+
         self._epochs_completed = 0
         self._index_in_epoch = 0
-        
-    
+
+
     def next_batch(self, batch_size):
-        """Method returning a certain batch of data. 
+        """ Method returning a certain batch of data. 
         Most of the code was obtained and adapted from 
         https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/learn/python/learn/datasets/mnist.py
 

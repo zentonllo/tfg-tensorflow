@@ -3,13 +3,18 @@
 Created on Fri May 26 11:03:21 2017
 
 @author: Alberto Terceño
+
+Module that uses deep neural networks to save logs and detailed results of the training process
+
+The code was built up from scratch
+
 """
 import tensorflow as tf
 import argparse
 from dataset import Dataset
 from dnn_multiclass import *
 # Uncomment the next line and comment the previous one if you want to use dnn with just one output neuron
-# from dnn_binary import *
+#from dnn_binary import *
 import sys
 import os
 from os.path import abspath
@@ -22,7 +27,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 # Parser FLAGS
 FLAGS = None
 
-# Default log-dir
+# Change DEFAULT_ROOT_LOGDIR for the default log-dir
 NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
 DEFAULT_ROOT_LOGDIR = '/tmp'
 DEFAULT_LOG_DIR = "{}/playground-run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
@@ -30,12 +35,12 @@ DEFAULT_LOG_DIR = "{}/playground-run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
 # Default value for Momentum optimizer
 MOMENTUM_PARAM = 0.9
 
-# Default values for FTRL optimizer
+# Default values for the FTRL optimizer
 L1_PARAM = 0.0
 L2_PARAM = 0.0
 
 def print_hidden_layers(hidden_layers):
-    
+    """Helper function to print the number of neurons in the hidden layers"""
     if hidden_layers is None:
         print("Hidden Layers: None (Logistic regression is performed)")
     else:
@@ -45,7 +50,7 @@ def print_hidden_layers(hidden_layers):
             i += 1
 
 def print_parameters(n_inputs, n_outputs, normalizer_params):
-    
+    """Helper function to print model hyperparameters."""
     print("Model hyperparameters (Binary classification problem)", "\n") 
     print("Input variables:", n_inputs)
     print_hidden_layers(FLAGS.hidden_layers)
@@ -71,7 +76,7 @@ def print_parameters(n_inputs, n_outputs, normalizer_params):
     print("Optimizer:", FLAGS.optimizer, "\n")
 
 def parse_act_function():
-    
+    """Function which parses the activation function."""
     fun = FLAGS.activation_function
     tf_fun = None
     
@@ -92,7 +97,7 @@ def parse_act_function():
 
 
 def parse_optimizer():
-    
+    """Function which parses the optimization for gradient descent."""
     opt = FLAGS.optimizer
     learning_rate = FLAGS.learning_rate
     
@@ -116,7 +121,7 @@ def parse_optimizer():
     return tf_opt
 
 def parse_regularizer():
-    
+    """Function that parses the regularization methods."""
     reg = FLAGS.regularization
     beta = FLAGS.reg_param
     
@@ -132,11 +137,14 @@ def parse_regularizer():
     return tf_reg
     
 
-# Parse parameters for batch normalization
 def parse_normalizer():
-    
-    # Batch norm en la primera capa asegura normalización de los datos
-    # Con Batch normalization podemos evitar normalizar datos y usar altas tasas de aprendizaje
+    """Function which parses parameters for batch normalization.
+
+    If batch normalization is used in the first layer then the input data is normalized
+    Batch normalization can be used with higher learning rates
+
+    """
+
     if FLAGS.batch_norm:
         normalizer_fn=tf.contrib.layers.batch_norm
     else:
@@ -150,14 +158,14 @@ def parse_normalizer():
     
     normalizer_params = {
     'is_training': None,
-    # 0.9 o 0.99 o 0.999 o 0.9999 ...
-    # Segun performance guide de TF: menor si va bien en training y peor en validation/test
-    # Según A.Geron, aumentar cuando el dataset es grande y los batches pequeños 
+    # 0.9, 0.99, 0.999 or 0.9999 ...
+    # According to TF performance guide: lower it if training is ok and validation/test is performing worse
+    # A.Geron suggest to try higher values for large datasets and small batch sizes 
     'decay': 0.9,
     'updates_collections': None,
-    # Si usamos funciones de activacion que no sean relus --> scale:true
+    # If we don't use activation functions --> scale:true
     'scale': scale_term,
-    # Aumenta rendimiento según la performance guide de TF
+    # The 'fused parameter' allows better performance according to the TF performance guide
     'fused': True
     
     # Try zero_debias_moving_mean=True for improved stability
@@ -174,7 +182,6 @@ def main(_):
     
     log_dir = FLAGS.log_dir
     
-    # Hacemos abspath para que funcione también en UNIX
     log_dir = abspath(log_dir)
     
 
@@ -182,7 +189,7 @@ def main(_):
         tf.gfile.DeleteRecursively(log_dir)
     tf.gfile.MakeDirs(log_dir)
     
-    # Checkpoints default paths
+    # Default paths for checkpoints and files generated
     M_FOLDER = abspath(log_dir + '/model')
     TR_FOLDER = abspath(log_dir + '/training')
     
@@ -196,19 +203,21 @@ def main(_):
 
     os.makedirs(M_FOLDER, exist_ok=True)
     os.makedirs(TR_FOLDER, exist_ok=True)
+    # Equivalent to:
     # tf.gfile.MakeDirs(M_FOLDER)
     # tf.gfile.MakeDirs(TR_FOLDER)
     
      
-    # OUTPUT_FILE = log_dir+"/log.txt"
     OUTPUT_FILE = os.path.abspath(log_dir+"/log.txt")
+    # Redirect standard output to the log file
     sys.stdout = open(OUTPUT_FILE, "w")
     
     # El path va sin la extensión. El módulo Dataset se encarga de adjuntar la extensión
+    # Recall that the file path doesn't have the extension. The Dataset class handles this.
     dataset_path = FLAGS.dataset_file
     
     
-    # Carga del dataset 
+    # Data ingestion stage
     print("--------------------- (1) Starting to load dataset ---------------------","\n")
     
     dataset = Dataset(path = dataset_path, train_percentage = 0.8, test_percentage = 0.1 )
@@ -223,23 +232,19 @@ def main(_):
     # We start to parse the hyperparameters 
     n_inputs  = dataset._num_features
     
-    # Binary or multiclass classification playground
     n_outputs = dataset._num_classes
     
-    
-    
-    # Parseo de capas intermedias
+    # Parsing hidden layers
     intermediate_layers = []
     if FLAGS.hidden_layers is not None:
         intermediate_layers = FLAGS.hidden_layers
     hidden_list = [n_inputs] + intermediate_layers + [n_outputs]
     
-    # Parseo de función de activación
+    # Parsing activation functions
     activation_function = parse_act_function()
-    
-    # (1 - keep_prob) es la probabilidad de que una neurona muera en el dropout
+  
+    # (1 - keep_prob) is the dropout rate
     keep_prob = FLAGS.dropout
-    
     
     nb_epochs = FLAGS.epochs
     batch_size = FLAGS.batch_size

@@ -4,9 +4,9 @@ Created on Fri May  5 11:26:14 2017
 
 @author: Alberto Terceño
 
+Benchmark module used to perform a grid search for DNN hyperparameters
 
-
-######## Hyperparameter tuning  - Instructions ##############################
+################# Hyperparameter tuning  - Instructions #####################
 
  1 - Choose a dataset (just the name of the csv or npy file)
  2 - Choose the hyperparameters grid to test. Fill up the different hyperparams lists in
@@ -34,12 +34,14 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 def print_execution_time(start, end):
+    """Helper function to print execution times properly formatted."""
     hours, rem = divmod(end-start, 3600)
     minutes, seconds = divmod(rem, 60)
     return ("{:0>2}:{:0>2}:{:0>2}".format(int(hours),int(minutes),int(seconds)))
 
 
 def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
+    """Helper function to print hyperparameters"""
     print("Hyperparameters", "\n")
     print("Learning rate:", lr)
     print("Hidden layers (Including input and output layers):", hl)
@@ -51,6 +53,7 @@ def print_parameters(lr,hl,af,kp,bs,reg,bn,opt):
     print("Optimizer:", opt, "\n")
 
 NOW = datetime.now().strftime("%Y-%m-%d--%Hh%Mm%Ss")
+# Change this path to place logs in different folders 
 DEFAULT_ROOT_LOGDIR = '/tmp'
 DEFAULT_LOG_DIR = "{}/hyptuning-run-{}".format(DEFAULT_ROOT_LOGDIR, NOW)
 OUTPUT_FILE = DEFAULT_LOG_DIR + "/tuning_results.txt"
@@ -64,8 +67,8 @@ sys.stdout = open(OUTPUT_FILE, "w")
 
 
 
-######################################## Choose a dataset path #####################################################
-####################################################################################################################
+############################### Choose a dataset path (do not include the extension) ##############################
+###################################################################################################################
 
 dataset_name = 'creditcard'
 
@@ -73,22 +76,25 @@ dataset_name = 'creditcard'
 ###################################################################################################################
 
 
-######################################## Choose lists of hyperparameters to test ##################################
+################################## Choose lists of hyperparameters to test ########################################
 ###################################################################################################################
+
+# Some sample hyperparameters have been commented to show how the different hyperparameters can be tested
 
 nb_epochs = 100
 
 # Use np.linspace() to get several values between a minimum and a maximum
-#learning_rate_list = [0.1,0.5]
 learning_rate_list = [0.001]
+#learning_rate_list = [0.1,0.5]
 
-#activation_function_list = [tf.nn.elu]
 activation_function_list = [tf.nn.relu, tf.nn.elu]
+#activation_function_list = [tf.nn.elu]
 
 keep_prob_list = [None]
 #keep_prob_list = [0.2,0.4,0.5,0.7]
 
 batch_size_list = [100]
+# batch_size_list = [100, 300, 500]
 
 regularizer_list = [None]
 #beta = 0.001
@@ -124,6 +130,8 @@ y_test = dataset.y_test
 
 n_inputs = dataset._num_features
 n_outputs = dataset._num_classes
+
+
 #hidden_lists= [[n_inputs, 10, 5, n_outputs], [n_inputs, 10, n_outputs], [n_inputs, 3, n_outputs]]
 hidden_lists= [[n_inputs, 15, 5, n_outputs], [n_inputs, 10, n_outputs], [n_inputs, 3, n_outputs]]
 
@@ -136,6 +144,7 @@ it = 0
 
 start_time = time.time()
 
+# Perform a grid search during training
 for learning_rate in learning_rate_list:
     for hidden_list in hidden_lists:
         for activation_function in activation_function_list:

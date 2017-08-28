@@ -100,7 +100,7 @@ El optimizer debe estar instanciado, ej: tf.train.AdamOptimizer(learning_rate=0.
 
 
 class DNN(object):
-        """Class that models a Deep Neural Network with several output neurons
+    """Class that models a Deep Neural Network with several output neurons
     
     There are training and predicting methods, as well as tools that generate plots.
     Most of the neural network hyperparameters are set when a class object is instanciated.

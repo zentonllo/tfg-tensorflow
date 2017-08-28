@@ -1,5 +1,13 @@
+"""
+Code and documentation extracted from a TensorLayer source file
+http://tensorlayer.readthedocs.io/en/latest/_modules/tensorlayer/activation.html#leaky_relu
+
+TensorLayer is a deep learning and reinforcement learning library based on Google TensorFlow
+https://github.com/zsdonghao/tensorlayer
+
+"""
+
 import tensorflow as tf
-# Obtenido de Tensorlayer
 def leaky_relu(x=None, alpha=0.1, name="LeakyReLU"):
     """The LeakyReLU, Shortcut is ``lrelu``.
 
