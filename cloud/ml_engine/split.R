@@ -6,8 +6,19 @@ if (!require(rio)) {
 # This script undersamples and splits a dataset into training and validation sets
 # in order to use them afterwards in ML Engine
 
+######################################################
+
 # CSV Path
 PATH <- "B:/Descargas/creditcard.csv"
+
+# Decide whether to undersample or not the dataset
+UNDERSAMPLE <- T
+
+# Paths used to export the CSV files
+TRAIN_PATH <- "B:/Descargas/creditcard.data.csv"
+TEST_PATH <- "B:/Descargas/creditcard.test.csv"
+
+######################################################
 
 # We read the csv and then undersampling is performed
 data <- import(PATH)
@@ -17,7 +28,9 @@ df <- data[which(data$Class == 1),]
 df$Class <- "fraud"
 
 df2 <- data[which(data$Class == 0),]
-df2 <- df2[sample(nrow(df2), nrow(df)), ]
+if(UNDERSAMPLE) {
+	df2 <- df2[sample(nrow(df2), nrow(df)), ]
+}
 df2$Class <- "notfraud"
 
 # Bind both dataframes and shuffle them
@@ -31,10 +44,6 @@ tr <- as.integer(nrow(result)*TRAIN_SIZE)
 train <- result[1:tr,]
 test <- result[(tr+1):nrow(result),]
 
-
-# Paths used to export the CSV files
-TRAIN_PATH <- "B:/Descargas/creditcard.data.csv"
-TEST_PATH <- "B:/Descargas/creditcard.test.csv"
 
 write.table(train, TRAIN_PATH,row.names = FALSE, col.names = FALSE, sep=",")
 write.table(test, TEST_PATH, row.names = FALSE, col.names = FALSE, sep=",")
